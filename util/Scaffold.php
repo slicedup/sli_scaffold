@@ -41,6 +41,9 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param unknown_type $config
 	 */
 	public static function config($config = array()){
+		if (is_bool($config)) {
+			$config = array('all' => $config);
+		}
 		if ($config) {
 			if (isset($config['scaffold'])) {
 				static::set($config['scaffold']);
@@ -57,7 +60,7 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param unknown_type $name
 	 * @param unknown_type $config
 	 */
-	public static function set($name, array $config = array()) {
+	public static function set($name, $config = array()) {
 		if (is_array($name)) {
 			foreach ($name as $_name => $_config) {
 				if (is_int($_name) && !is_array($_config)) {
