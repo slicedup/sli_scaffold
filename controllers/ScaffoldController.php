@@ -11,7 +11,7 @@ namespace slicedup_scaffold\controllers;
 use lithium\util;
 
 use lithium\util\Inflector;
-use slicedup_scaffold\Scaffold;
+use slicedup_scaffold\util\Scaffold;
 use slicedup_scaffold\models\ScaffoldModel;
 
 class ScaffoldController extends \lithium\action\Controller {

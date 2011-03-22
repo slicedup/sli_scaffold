@@ -6,9 +6,7 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold;
-
-use lithium\util;
+namespace slicedup_scaffold\util;
 
 use lithium\core\Libraries;
 use lithium\net\http\Media;

@@ -7,7 +7,7 @@
  */
 
 use lithium\action\Dispatcher;
-use slicedup_scaffold\Scaffold;
+use slicedup_scaffold\util\Scaffold;
 
 Dispatcher::applyFilter('_callable', function($self, $params, $chain) {
 	try {
