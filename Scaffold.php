@@ -106,10 +106,14 @@ class Scaffold extends \lithium\core\StaticObject {
 		return $config;
 	}
 
+	/**
+	 *
+	 * @param unknown_type $name
+	 */
 	public static function defaults($name) {
 		return array(
 			'controller' => self::controller($name, false) ?: null,
-			'model' => static::model($name) ?: null
+			'model' => static::model($name, false) ?: null
 		);
 	}
 
@@ -134,6 +138,11 @@ class Scaffold extends \lithium\core\StaticObject {
 		return $controller;
 	}
 
+	/**
+	 *
+	 * @param unknown_type $name
+	 * @param unknown_type $default
+	 */
 	public static function controller($name, $default = true) {
 		$config = static::get($name, false);
 		if ($config === false) {
@@ -153,6 +162,12 @@ class Scaffold extends \lithium\core\StaticObject {
 		return $controller;
 	}
 
+	/**
+	 *
+	 * @param unknown_type $name
+	 * @param unknown_type $default
+	 * @return string|NULL
+	 */
 	public static function model($name, $default = true) {
 		$config = static::get($name, false);
 		if ($config === false) {
@@ -204,6 +219,8 @@ class Scaffold extends \lithium\core\StaticObject {
 
 	/**
 	 * Checks is an action is provided in the Scaffold config
+	 *
+	 * @todo integrate per config checking
 	 *
 	 * @param unknown_type $name
 	 * @param unknown_type $action
