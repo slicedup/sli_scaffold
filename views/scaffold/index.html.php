@@ -15,7 +15,7 @@ $this->title($t($plural));
 			<?php foreach ($fields as $field => $name):?>
 				<th><?php echo $t($name);?></th>
 			<?php endforeach;?>
-				<th class="actions">Actions</th>
+				<th class="actions"><?php echo $t('Actions');?></th>
 			</tr>
 		<?php foreach ($recordSet as $record):?>
 			<tr>
