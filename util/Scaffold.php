@@ -279,7 +279,7 @@ class Scaffold extends \lithium\core\StaticObject {
 		//}
 		Media::type($controller->request->type(), null, array(
 			'view' => '\lithium\template\View',
-            'paths' => $paths
+			'paths' => $paths
 		));
 	}
 
@@ -291,7 +291,7 @@ class Scaffold extends \lithium\core\StaticObject {
 	 */
 	protected static function _name($name) {
 		$name = Inflector::underscore($name);
-		$name = preg_replace('/app_|_controller(s)?/', '', $name);
+		$name = preg_replace('/^app_|_controller(s)?/', '', $name);
 		return $name;
 	}
 }
