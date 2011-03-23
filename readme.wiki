@@ -1,0 +1,142 @@
+#Slicedup Scaffold
+**Version:** 
+
+* 0.1 - 25 March 2011
+
+**Sources:**
+
+* <https://github.com/websta/slicedup_scaffold/>
+
+**Requires:**
+
+* n/a
+
+##Overview
+
+The Slicedup Scaffold plugin provides application scaffolding, which allows
+you to create a basic application structure to perform C.R.U.D. actions on 
+data collections, while writing little or NO application code.
+
+##Installation
+
+1. Install as `slicedup_scaffold` to your application's `libraries` directory.
+
+2. Add to your application in your bootstrap.
+{{{
+//app/config/bootstrap/libraries.php
+Libraries::add('slicedup_scaffold');
+}}}
+
+##Configuration & Usage
+
+Unconfigured, Slicedup Scaffold will accept CRUD requests for any data
+collection configured in your default datasource.
+
+**You do not need to write any more code to create your scaffolded application!**
+
+####Full Scaffold
+Create a database table, or collection in your datasource of choice, this 
+collection should follow the convention of using a pluralized name, e.g. 
+`posts`, `pages` or `users`.
+
+Now access the scaffold for your collection by visiting the url that matches
+your collection name, e.g. `/posts`, `/pages` or `/users`.
+
+####Model Only Scaffold
+Building on what we have achieved above, once you have created your data
+collection you can now create your model class, e.g. `app\models\Post`. Your
+`posts` scaffolds will now use your `Post` model for all data handling, allowing
+you access to manipulate your data pre & post CRUD actions at model level.
+
+####Partial Controller Scaffold
+Scaffolded actions are directed through the plugin's `ScaffoldController`. To
+begin building your application request/response actions, you can start creating
+your own application controllers while still utilizing the scaffold for the
+default actions. To enable scaffolding on a controller you have created, we simply
+add the class property `scaffold`.
+{{{
+namespace app\controlers;
+class PostsController extends \lithium\action\Controller {
+	public $scaffold;
+}
+}}}
+By default the plugin will scaffold actions named `index`, `view`, `add`, `edit`
+and `delete`. If you want to add another action to your scaffolded controller,
+simply define it in your controller e.g.
+{{{
+namespace app\controlers;
+class PostsController extends \lithium\action\Controller {
+	public $scaffold;
+	public function archives(){
+		//do some things here!
+	}
+}
+}}}
+Requests to `/posts` are now dispatched to your `PostsController`, actions that
+have been defined, in this case `archives`, will be invoked in the standard
+request cycle. However the scaffold actions not defined by this controller
+will be re-routed through an instance of the `ScaffoldController`.
+
+####Full Controller Scaffold
+If your application intends to use scaffolding permanently, you may opt to
+directly extend the `ScaffoldController` itself. This can be done so freely
+and should not create any issues moving forward.
+
+####Mixed Scaffold
+There is no limitation on what you scaffold and what you don't, scaffolded
+controllers & models can be used completely independantly.
+
+####Scaffold Templates
+Scaffold view templates are loaded by default from the plugin's templates, but
+you are free to create views for your scaffolds, these will be used if they exist.
+Create them as you would normally in your controller views directory.
+
+####Configuration Options
+Scaffolding is controlled by configuring the `slicedup_scaffold\util\Scaffold`
+class, and additionally by setting options within your own controllers `scaffold`
+property.
+
+#####Current global configuration options:
+
+`all` : this controls the plugin's ability to catch requests for controllers that
+do no exist, and for which you have not created a scaffold config. By default
+this option is `true` enabling full scaffolding from your existing controllers
+and/or datasource collections.
+
+#####Current scaffold configurations options
+
+`controller` : configure a non standard controller class for accepting incoming
+scaffold requests
+`model` : configure a non standard model class for data hanndling
+
+#####Configuration Examples
+
+{{{
+use slicedup_scaffold\util\Scaffold;
+
+//Global
+Scaffold::config(array(
+	'all' => false, //disable catch all scaffolds
+	'scaffold' => array('posts', 'pages') //accept scaffolds for posts & pages
+));
+
+//Individual scaffold config
+Scaffold::set('users', $options); //enable scaffolds for users
+}}}
+
+##Development
+Development is ongoing, no roadmap or equivilant formality exists at the present time.
+
+###Planned Features, Limitations & Known Isssues
+* Complete scaffold feld set mappings to control fields used in each scaffolds from models
+* Allow models to further affect scaffolds
+* Use appropriate form fields for relevant data
+* Ability to apply custom form field mappings, globally as sets, and per model
+* Incorporate search into index action
+* Pagination for index action
+* Scaffold display action for template display
+* Scaffold _groups_
+* Greater control & flexibility of templates
+* Support scaffolds in any library
+* Scaffold associations
+* More Docs & Tests of course!
