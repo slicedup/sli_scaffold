@@ -1,11 +1,15 @@
-#Slicedup Scaffold
+Slicedup Scaffold
+=================
+
+http://www.slicedup.org/docs/scaffold
+
 **Version:** 
 
 * 0.1 - 25 March 2011
 
 **Sources:**
 
-* <https://github.com/websta/slicedup_scaffold/>
+* https://github.com/websta/slicedup_scaffold/
 
 **Requires:**
 
