@@ -9,11 +9,13 @@
 namespace slicedup_scaffold\tests\cases\util;
 
 use slicedup_scaffold\util\Scaffold;
+use lithium\tests\mocks\data\MockPost;
 use lithium\action\Request;
 use lithium\net\http\Router;
 use lithium\action\Dispatcher;
 use lithium\core\Libraries;
 use lithium\util\Set;
+use lithium\data\Connections;
 
 Libraries::paths(array(
 	'controllers' => Set::merge(Libraries::paths('controllers'), array(
@@ -22,15 +24,25 @@ Libraries::paths(array(
 		)
 	)),
 	'models' => Set::merge((array) Libraries::paths('models'), array(
-		'{:library}\tests\mocks\models\{:name}' => array(
-			'libraries' => array('slicedup_scaffold')
+		'{:library}\tests\mocks\data\{:name}' => array(
+			'libraries' => array('lithium')
 		)
 	))
 ));
 
 class ScaffoldTest extends \lithium\test\Unit {
 
+	public function setUp() {
+		$this->_configs = Connections::config();
+		Connections::config($this->_configs + array('mock-source' => array(
+			'type' => 'lithium\tests\mocks\data\MockSource'
+		)));
+		MockPost::config();
+	}
+
 	public function tearDown() {
+		Connections::config(array('mock-source' => false));
+		Connections::config($this->_configs);
 		$config = Scaffold::config();
 		Scaffold::config(array('all' => true));
 		if (!empty($config['scaffold'])) {
@@ -170,18 +182,21 @@ class ScaffoldTest extends \lithium\test\Unit {
 		$this->assertIdentical($expected, Scaffold::model('posts'));
 
 		$config = array(
-			'model' => '\slicedup_scaffold\tests\mocks\models\MockModel'
+			'model' => '\lithium\tests\mocks\data\MockPost'
 		);
 		Scaffold::set('posts', $config);
 		$expected = $config['model'];
 		$this->assertIdentical($expected, Scaffold::model('posts'));
 
 		$config = array(
-			'model' => 'MockModel'
+			'model' => 'MockPost'
 		);
 		Scaffold::set('posts', $config);
-		$expected = '\slicedup_scaffold\tests\mocks\models\MockModel';
+		$expected = '\lithium\tests\mocks\data\MockPost';
 		$this->assertIdentical($expected, Scaffold::model('posts'));
+		$meta = $expected::meta();
+		$this->assertEqual('MockPost', $meta['name']);
+		$this->assertEqual('mock_posts', $meta['source']);
 	}
 
 	public function testCallable() {
