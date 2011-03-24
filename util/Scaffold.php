@@ -152,7 +152,11 @@ class Scaffold extends \lithium\core\StaticObject {
 		$controller = null;
 		if (isset($config['controller'])) {
 			if (!class_exists($config['controller'])) {
-				$controller = Libraries::locate('controller', $config['controller']);
+				if (strpos($config['controller'],'\\') === false) {
+					if ($controller = Libraries::locate('controllers', $config['controller'])) {
+						$controller = '\\' . $controller;
+					}
+				}
 			} else {
 				$controller = $config['controller'];
 			}
@@ -177,12 +181,16 @@ class Scaffold extends \lithium\core\StaticObject {
 		$model = null;
 		if (isset($config['model'])) {
 			if (!class_exists($config['model'])) {
-				$model = Libraries::locate('model', Inflector::classify($config['model']));
+				if (strpos($config['model'],'\\') === false) {
+					if($model = Libraries::locate('models', $config['model'])) {
+						$model = '\\' . $model;
+					}
+				}
 			} else {
 				$model = $config['model'];
 			}
 		} else {
-			$model = Libraries::locate('model', Inflector::classify($name));
+			$model = Libraries::locate('models', Inflector::classify($name));
 		}
 		if (!$model && $default) {
 			$model = static::$_classes['model'];
@@ -193,7 +201,7 @@ class Scaffold extends \lithium\core\StaticObject {
 			$model::meta(array(
 				'connection' => $connection,
 				'source' => Inflector::tableize($name),
-				'name' => Inflector::classify($config['model'])
+				'name' => Inflector::classify($name)
 			));
 		}
 		return $model;
@@ -235,7 +243,7 @@ class Scaffold extends \lithium\core\StaticObject {
 	 *
 	 * @param \lithium\action\Controller $controller
 	 */
-	public static function prepareController($name, \lithium\action\Controller $controller){
+	public static function prepareController($name, \lithium\action\Controller &$controller){
 		if (!property_exists($controller, 'scaffold')) {
 			return;
 		}
@@ -246,12 +254,11 @@ class Scaffold extends \lithium\core\StaticObject {
 		$controller->scaffold['name'] = $name;
 		$config = static::get($name);
 		$config = $controller->scaffold + $config;
-		$config['controller'] = get_class($controller);
+		$config['controller'] = '\\' . get_class($controller);
 		static::set($name, $config);
 
 		$controller->scaffold = $config;
-		static::_setMediaPaths($name, $controller);
-		return $controller;
+		static::_setMediaPaths($controller);
 	}
 
 	/**
@@ -263,8 +270,9 @@ class Scaffold extends \lithium\core\StaticObject {
 	 *
 	 * @param \lithium\action\Controller $controller
 	 */
-	protected static function _setMediaPaths($name, \lithium\action\Controller $controller){
+	protected static function _setMediaPaths(\lithium\action\Controller &$controller){
 		$scaffold = Libraries::get('slicedup_scaffold');
+		$name = $controller->scaffold['name'];
 		$paths = array(
 			'template' => array(
 				"{:library}/views/{$name}/{:template}.{:type}.php",
