@@ -41,7 +41,8 @@ class ScaffoldController extends \lithium\action\Controller {
 		$fields = ScaffoldModel::getCreateFields($model);
 		$record = $model::create();
 		if (($this->request->data) && $record->save($this->request->data)) {
-			$this->redirect(array('action' => 'index', 'args' => array($record->id)));
+			d($record);
+			$this->redirect(array('action' => 'index'));
 		}
 		return compact('record', 'fields');
 	}
@@ -55,7 +56,7 @@ class ScaffoldController extends \lithium\action\Controller {
 			$this->redirect(array('action' => 'index'));
 		}
 		if (($this->request->data) && $record->save($this->request->data)) {
-			$this->redirect(array('action' => 'view', 'args' => array($record->id)));
+			$this->redirect(array('action' => 'index'));
 		}
 		return compact('record', 'fields');
 	}
