@@ -21,9 +21,18 @@ The Slicedup Scaffold plugin provides application scaffolding, which allows
 you to create a basic application structure to perform C.R.U.D. actions on 
 data collections, while writing little or NO application code.
 
+Providing out of the packet rapid application prototyping, it also allows for
+progressively building the various components of a scaffold individually,
+so that you can control explicitly your data handling, requests & responses
+and presentation layer while filling in the gaps with scaffolded logic. 
+
+Furthermore it is intended that scaffolds may persist in to your production
+application, removing the need to create vast amounts of duplicate code for
+performing basic CRUD actions.
+
 ##Installation
 
-1. Install as `slicedup_scaffold` to your application's `libraries` directory.
+1. Install as `slicedup_scaffold` to your application `libraries` directory.
 
 2. Add to your application in your bootstrap.
 {{{
@@ -81,19 +90,41 @@ have been defined, in this case `archives`, will be invoked in the standard
 request cycle. However the scaffold actions not defined by this controller
 will be re-routed through an instance of the `ScaffoldController`.
 
-####Full Controller Scaffold
+####Model-less Scaffolds
+While only simple model layer support is in place in this initial release, and
+it is intended that models will really form the backbone of your scaffolds, when
+using scaffolds without a model you have model access via the `Scaffold::model()` 
+method. Using the above example, this might look like:
+{{{
+namespace app\controlers;
+use slicedup_scaffold\util\Scaffold;
+class PostsController extends \lithium\action\Controller {
+	public $scaffold; //populated with scaffold config at runtime
+	public function archives(){
+		$model = Scaffold::model($this->scaffold['name']);
+		$archives = $model::find('all', $someQueryOptions);
+	}
+}
+}}}
+
+####Extended Controller Scaffold
 If your application intends to use scaffolding permanently, you may opt to
 directly extend the `ScaffoldController` itself. This can be done so freely
 and should not create any issues moving forward.
 
 ####Mixed Scaffold
 There is no limitation on what you scaffold and what you don't, scaffolded
-controllers & models can be used completely independantly.
+controllers & models can be used completely independantly and using custom
+templates does not require you to create your controller classes.
 
 ####Scaffold Templates
 Scaffold view templates are loaded by default from the plugin's templates, but
 you are free to create views for your scaffolds, these will be used if they exist.
-Create them as you would normally in your controller views directory.
+Create them as you would normally in your controller's views directory. For a
+request to scaffold `posts`, the following locations would checked in this order:  
+`{app}/views/posts/`  
+`{app}/views/scaffold/`  
+`{slicedup_scaffold}/views/scaffold/`  
 
 ####Configuration Options
 Scaffolding is controlled by configuring the `slicedup_scaffold\util\Scaffold`
@@ -110,8 +141,8 @@ and/or datasource collections.
 #####Current scaffold configurations options
 
 `controller` : configure a non standard controller class for accepting incoming
-scaffold requests
-`model` : configure a non standard model class for data hanndling
+scaffold requests  
+`model` : configure a non standard model class for data handling
 
 #####Configuration Examples
 
@@ -132,15 +163,21 @@ Scaffold::set('users', $options); //enable scaffolds for users
 Development is ongoing, no roadmap or equivilant formality exists at the present time.
 
 ###Planned Features, Limitations & Known Isssues
-* Complete scaffold feld set mappings to control fields used in each scaffolds from models
+In no particular order:
+
+* Complete scaffold feld set mappings to control fields used in each scaffold from model
 * Allow models to further affect scaffolds
-* Use appropriate form fields for relevant data
+* Use appropriate form fields for relevant data (currently all basic text inputs)
+* Greater routing control, action prefixes etc
 * Ability to apply custom form field mappings, globally as sets, and per model
+* Configurable form field rendering and input/output filters
 * Incorporate search into index action
-* Pagination for index action
-* Scaffold display action for template display
-* Scaffold _groups_
-* Greater control & flexibility of templates
+* Pagination for index action (currently loads all, be wary of large data sets)
+* Scaffold display action for template display (maybe)
+* Scaffold _groups_ (provide actions for many scaffolds in a single interface)
+* Greater control & flexibility of templates, allow loading from other libraries
 * Support scaffolds in any library
 * Scaffold associations
+* Runtime class generation options (create non existent models & controllers on the fly)
+* Config global options via Libraries::add()
 * More Docs & Tests of course!
