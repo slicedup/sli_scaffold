@@ -129,11 +129,17 @@ class Scaffold extends \lithium\core\StaticObject {
 	public static function callable($params){
 		$options = array('request' => $params['request']) + $params['options'];
 		$name = $params['params']['controller'];
-		if ($controller = static::controller($name, false)) {
+		$controller = static::controller($name, false);
+		if ($controller) {
 			$config['controller'] = $controller;
 			static::set($name, $config);
-			$controller = new $config['controller']($options);
-		} else {
+			$action = $params['params']['action'];
+			if (!method_exists($config['controller'], $action) && Scaffold::action($name, $action)) {
+				$controller = Scaffold::reassignController($name, $controller, $params);
+			} else {
+				$controller = new $config['controller']($options);
+			}
+		} elseif ($controller !== false) {
 			$controller = static::_instance('controller', $options);
 		}
 		return $controller;
@@ -208,22 +214,22 @@ class Scaffold extends \lithium\core\StaticObject {
 	}
 
 	/**
-	 * Call an action that does not exist in scaffolded controller by creating a
-	 * new ScaffoldController, configuring and invoking it
+	 *
 	 *
 	 * @param unknown_type $name
 	 * @param unknown_type $controller
 	 * @param unknown_type $params
+	 * @return unknown
 	 */
-	public static function invokeAction($name, $controller, $params){
+	public static function &reassignController($name, $controller, $params) {
 		$options = array('request' => $params['request']) + $params['options'];
 		$scaffoldController = static::_instance('controller', $options);
 		static::prepareController($name, $scaffoldController);
-		$scaffoldController->scaffold['controller'] = get_class($controller);
+		$scaffoldController->scaffold['controller'] = $controller;
 		$config = static::get($name);
 		$config['controller'] = get_class($scaffoldController);
 		static::set($name, $config);
-		return $scaffoldController($params['request'], $params['dispatchParams']);
+		return $scaffoldController;
 	}
 
 	/**

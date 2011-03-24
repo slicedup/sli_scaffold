@@ -18,19 +18,7 @@ Dispatcher::applyFilter('_callable', function($self, $params, $chain) {
 		}
 	}
 	if (property_exists($controller, 'scaffold')) {
-		$name = $params['params']['controller'];
-		$controller = Scaffold::prepareController($name, $controller);
-		$controller->applyFilter('__invoke', function($self, $params, $chain){
-			$name = $self->scaffold['name'];
-			$request = $params['request'];
-			$options = $params['options'];
-			$dispatchParams = $params['dispatchParams'];
-			$action = isset($dispatchParams['action']) ? $dispatchParams['action'] : 'index';
-			if (!method_exists($self, $action) && Scaffold::action($name, $action)) {
-				return Scaffold::invokeAction($name, $self, $params);
-			}
-			return $chain->next($self, $params, $chain);
-		});
+		Scaffold::prepareController($params['params']['controller'], $controller);
 	}
 	return $controller;
 });
