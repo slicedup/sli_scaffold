@@ -10,15 +10,18 @@ use lithium\action\Dispatcher;
 use slicedup_scaffold\util\Scaffold;
 
 Dispatcher::applyFilter('_callable', function($self, $params, $chain) {
+	$name = $params['params']['controller'];
 	try {
 		$controller = $chain->next($self, $params, $chain);
+		if (property_exists($controller, 'scaffold')) {
+			Scaffold::prepareController($name, $controller);
+			Scaffold::reassignController($name, $controller, $params);
+		}
 	} catch (lithium\action\DispatchException $e) {
 		if(!$controller = Scaffold::callable($params)) {
 			throw $e;
 		}
-	}
-	if (property_exists($controller, 'scaffold')) {
-		Scaffold::prepareController($params['params']['controller'], $controller);
+		Scaffold::prepareController($name, $controller);
 	}
 	return $controller;
 });

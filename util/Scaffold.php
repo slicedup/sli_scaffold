@@ -134,11 +134,8 @@ class Scaffold extends \lithium\core\StaticObject {
 			$config['controller'] = $controller;
 			static::set($name, $config);
 			$action = $params['params']['action'];
-			if (!method_exists($config['controller'], $action) && Scaffold::action($name, $action)) {
-				$controller = Scaffold::reassignController($name, $controller, $params);
-			} else {
-				$controller = new $config['controller']($options);
-			}
+			$controller = new $config['controller']($options);
+			Scaffold::reassignController($name, $controller, $params);
 		} elseif ($controller !== false) {
 			$controller = static::_instance('controller', $options);
 		}
@@ -221,15 +218,18 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param unknown_type $params
 	 * @return unknown
 	 */
-	public static function &reassignController($name, $controller, $params) {
-		$options = array('request' => $params['request']) + $params['options'];
-		$scaffoldController = static::_instance('controller', $options);
-		static::prepareController($name, $scaffoldController);
-		$scaffoldController->scaffold['controller'] = $controller;
-		$config = static::get($name);
-		$config['controller'] = get_class($scaffoldController);
-		static::set($name, $config);
-		return $scaffoldController;
+	public static function reassignController($name, \lithium\action\Controller &$controller, $params) {
+		$action = $params['params']['action'];
+		if (!method_exists($controller, $action) && Scaffold::action($name, $action)) {
+			$original = get_class($controller);
+			$options = array('request' => $params['request']) + $params['options'];
+			$controller = static::_instance('controller', $options);
+			static::prepareController($name, $controller);
+			$controller->scaffold['controller'] = $original;
+			$config = static::get($name);
+			$config['controller'] = $original;
+			static::set($name, $config);
+		}
 	}
 
 	/**
