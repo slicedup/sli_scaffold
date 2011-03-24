@@ -9,11 +9,11 @@ http://www.slicedup.org/docs/scaffold
 
 **Sources:**
 
-* https://github.com/websta/slicedup_scaffold/
+* <https://github.com/websta/slicedup_scaffold/>
 
 **Requires:**
 
-* n/a
+* Lithium: <http://dev.lithify.me/lithium/source>
 
 ##Overview
 
