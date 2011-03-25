@@ -235,7 +235,7 @@ class ScaffoldTest extends \lithium\test\Unit {
 		$params = $this->_request();
 		$controller = Scaffold::callable($params);
 		$this->assertNull($controller->scaffold);
-		Scaffold::prepareController('posts', $controller);
+		Scaffold::prepareController('posts', $controller, $params);
 		$this->assertTrue(!empty($controller->scaffold));
 		$this->assertIdentical('\slicedup_scaffold\controllers\ScaffoldController', $controller->scaffold['controller']);
 		$this->assertIdentical('posts', $controller->scaffold['name']);
@@ -256,6 +256,9 @@ class ScaffoldTest extends \lithium\test\Unit {
 		Scaffold::set('posts', $config);
 		$params = $this->_request('/posts/view/1');
 		$result = Scaffold::callable($params);
+		$this->assertTrue($result instanceof \slicedup_scaffold\tests\mocks\controllers\MockController);
+
+		Scaffold::prepareController('posts', $result, $params);
 		$this->assertTrue($result instanceof \slicedup_scaffold\controllers\ScaffoldController);
 	}
 

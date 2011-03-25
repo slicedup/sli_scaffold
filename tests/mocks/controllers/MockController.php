@@ -10,6 +10,8 @@ namespace slicedup_scaffold\tests\mocks\controllers;
 
 class MockController extends \lithium\action\Controller {
 
+	public $scaffold;
+
 	public function index() {}
 
 }

@@ -108,17 +108,6 @@ class Scaffold extends \lithium\core\StaticObject {
 	}
 
 	/**
-	 *
-	 * @param unknown_type $name
-	 */
-	public static function defaults($name) {
-		return array(
-			'controller' => self::controller($name, false) ?: null,
-			'model' => static::model($name, false) ?: null
-		);
-	}
-
-	/**
 	 * Takes params passed in Dispatcher::_callable() and loads a
 	 * ScaffoldController instance for the current request if Scaffold is
 	 * configured to accept requests for that controller
@@ -135,11 +124,40 @@ class Scaffold extends \lithium\core\StaticObject {
 			static::set($name, $config);
 			$action = $params['params']['action'];
 			$controller = new $config['controller']($options);
-			Scaffold::reassignController($name, $controller, $params);
 		} elseif ($controller !== false) {
 			$controller = static::_instance('controller', $options);
 		}
 		return $controller;
+	}
+
+	/**
+	 * Prepare Controller environment for scaffold
+	 *
+	 * @param unknown_type $name
+	 * @param \lithium\action\Controller $controller
+	 * @param unknown_type $params
+	 */
+	public static function prepareController($name, \lithium\action\Controller &$controller, $params){
+		if (!property_exists($controller, 'scaffold')) {
+			return;
+		}
+		if (!is_array($controller->scaffold)) {
+			$controller->scaffold = array();
+		}
+		$name = static::_name($name);
+		$controller->scaffold['name'] = $name;
+		$config = static::get($name);
+		$config = $controller->scaffold + $config;
+		$config['controller'] = '\\' . get_class($controller);
+		static::set($name, $config);
+		$action = $params['params']['action'];
+		if (!method_exists($controller, $action) && static::action($name, $action)) {
+			$config['controller'] = get_class($controller);
+			$options = array('request' => $params['request']) + $params['options'];
+			$controller = static::_instance('controller', $options);
+		}
+		$controller->scaffold = $config;
+		static::_setMediaPaths($controller);
 	}
 
 	/**
@@ -211,28 +229,6 @@ class Scaffold extends \lithium\core\StaticObject {
 	}
 
 	/**
-	 *
-	 *
-	 * @param unknown_type $name
-	 * @param unknown_type $controller
-	 * @param unknown_type $params
-	 * @return unknown
-	 */
-	public static function reassignController($name, \lithium\action\Controller &$controller, $params) {
-		$action = $params['params']['action'];
-		if (!method_exists($controller, $action) && Scaffold::action($name, $action)) {
-			$original = get_class($controller);
-			$options = array('request' => $params['request']) + $params['options'];
-			$controller = static::_instance('controller', $options);
-			static::prepareController($name, $controller);
-			$controller->scaffold['controller'] = $original;
-			$config = static::get($name);
-			$config['controller'] = $original;
-			static::set($name, $config);
-		}
-	}
-
-	/**
 	 * Checks is an action is provided in the Scaffold config
 	 *
 	 * @todo integrate per config checking
@@ -245,26 +241,14 @@ class Scaffold extends \lithium\core\StaticObject {
 	}
 
 	/**
-	 * Prepare Controller environment for scaffold
 	 *
-	 * @param \lithium\action\Controller $controller
+	 * @param unknown_type $name
 	 */
-	public static function prepareController($name, \lithium\action\Controller &$controller){
-		if (!property_exists($controller, 'scaffold')) {
-			return;
-		}
-		if (!is_array($controller->scaffold)) {
-			$controller->scaffold = array();
-		}
-		$name = static::_name($name);
-		$controller->scaffold['name'] = $name;
-		$config = static::get($name);
-		$config = $controller->scaffold + $config;
-		$config['controller'] = '\\' . get_class($controller);
-		static::set($name, $config);
-
-		$controller->scaffold = $config;
-		static::_setMediaPaths($controller);
+	public static function defaults($name) {
+		return array(
+			'controller' => self::controller($name, false) ?: null,
+			'model' => static::model($name, false) ?: null
+		);
 	}
 
 	/**
