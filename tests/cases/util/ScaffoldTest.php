@@ -260,6 +260,8 @@ class ScaffoldTest extends \lithium\test\Unit {
 
 		Scaffold::prepareController('posts', $result, $params);
 		$this->assertTrue($result instanceof \slicedup_scaffold\controllers\ScaffoldController);
+		$this->assertEqual($result->scaffold['controller'], '\slicedup_scaffold\tests\mocks\controllers\MockController');
+		$this->assertEqual(Scaffold::controller('posts'), '\slicedup_scaffold\tests\mocks\controllers\MockController');
 	}
 
 	/**

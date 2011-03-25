@@ -141,22 +141,20 @@ class Scaffold extends \lithium\core\StaticObject {
 		if (!property_exists($controller, 'scaffold')) {
 			return;
 		}
-		if (!is_array($controller->scaffold)) {
-			$controller->scaffold = array();
-		}
+
 		$name = static::_name($name);
-		$controller->scaffold['name'] = $name;
 		$config = static::get($name);
-		$config = $controller->scaffold + $config;
+		$config = (array) $controller->scaffold + $config;
 		$config['controller'] = '\\' . get_class($controller);
-		static::set($name, $config);
+
 		$action = $params['params']['action'];
 		if (!method_exists($controller, $action) && static::action($name, $action)) {
-			$config['controller'] = get_class($controller);
 			$options = array('request' => $params['request']) + $params['options'];
 			$controller = static::_instance('controller', $options);
 		}
-		$controller->scaffold = $config;
+
+		$controller->scaffold = compact('name') + $config;
+		static::set($name, $config);
 		static::_setMediaPaths($controller);
 	}
 
