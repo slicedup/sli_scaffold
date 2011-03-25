@@ -62,7 +62,10 @@ class ScaffoldController extends \lithium\action\Controller {
 
 	public function delete() {
 		$model = Scaffold::model($this->scaffold['name']);
-		$model::delete($this->request->id);
+		$record = $model::find($this->request->id);
+		if ($record) {
+			$record->delete();
+		}
 		$this->redirect(array('action' => 'index'));
 	}
 
