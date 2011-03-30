@@ -12,12 +12,7 @@ $this->title($t($plural));
 	<h2><?php echo $t('{:action} {:entity}', array('action' => $t('Edit'), 'entity' => $t($singular)));?></h2>
 	<div class="edit <?php echo $singular;?>">
 		<?php
-			echo $this->form->create($record, array('url' => array('action' => 'edit', 'args' => $record->key())));
-			foreach ($fields as $field => $name):
-				echo $this->form->field($field);
-			endforeach;
-			echo $this->form->submit('Update');
-			echo $this->form->end();
+			echo $this->scaffold->form();
 		?>
 	</div>
 	<ul class="actions">

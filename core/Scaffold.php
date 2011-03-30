@@ -312,7 +312,7 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param string $fieldset
 	 */
 	public static function getFormFieldSet($model, $fieldset){
-		return static::_getAllFields($model);
+		return array(static::_getAllFields($model));
 	}
 
 	/**
