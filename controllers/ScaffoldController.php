@@ -37,7 +37,7 @@ class ScaffoldController extends \lithium\action\Controller {
 	public function add() {
 		$vars = $this->_scaffoldVars();
 		extract($vars);
-		$fields = Scaffold::getCreateFields($model);
+		$fields = Scaffold::getAddFormFields($model);
 		$record = $model::create();
 		if (($this->request->data) && $record->save($this->request->data)) {
 			$this->redirect(array('action' => 'index'));
@@ -48,7 +48,7 @@ class ScaffoldController extends \lithium\action\Controller {
 	public function edit() {
 		$vars = $this->_scaffoldVars();
 		extract($vars);
-		$fields = Scaffold::getUpdateFields($model);
+		$fields = Scaffold::getEditFormFields($model);
 		$record = $model::find($this->request->id);
 		if (!$record) {
 			$this->redirect(array('action' => 'index'));
@@ -75,7 +75,8 @@ class ScaffoldController extends \lithium\action\Controller {
 		$vars = array(
 			'model' => Scaffold::model($this->scaffold['name']),
 			'plural' => Inflector::pluralize($name),
-			'singular' => Inflector::singularize($name)
+			'singular' => Inflector::singularize($name),
+			'actions' => Scaffold::handledAction($name . 'fd')
 		);
 		$this->set($vars);
 		return $vars;
