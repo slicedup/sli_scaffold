@@ -6,7 +6,7 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\tests\cases\models;
+namespace slicedup_scaffold\models;
 
-class ScaffoldModelTest extends \lithium\test\Unit {}
+class Scaffolds extends \lithium\data\Model {}
 ?>

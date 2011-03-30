@@ -164,21 +164,21 @@ class ScaffoldTest extends \lithium\test\Unit {
 		Scaffold::set('posts');
 		$result = Scaffold::get('posts');
 		$this->assertNull($result['model']);
-		$expected = '\slicedup_scaffold\models\ScaffoldModel';
+		$expected = '\slicedup_scaffold\models\Scaffolds';
 		$this->assertIdentical($expected, Scaffold::model('posts'));
 
 		$config = array(
 			'model' => '\slicedup_scaffold\tests\mocks\models\NonExistentModel'
 		);
 		Scaffold::set('posts', $config);
-		$expected = '\slicedup_scaffold\models\ScaffoldModel';
+		$expected = '\slicedup_scaffold\models\Scaffolds';
 		$this->assertIdentical($expected, Scaffold::model('posts'));
 
 		$config = array(
 			'model' => 'NonExistentModel'
 		);
 		Scaffold::set('posts', $config);
-		$expected = '\slicedup_scaffold\models\ScaffoldModel';
+		$expected = '\slicedup_scaffold\models\Scaffolds';
 		$this->assertIdentical($expected, Scaffold::model('posts'));
 
 		$config = array(
@@ -262,6 +262,16 @@ class ScaffoldTest extends \lithium\test\Unit {
 		$this->assertTrue($result instanceof \slicedup_scaffold\controllers\ScaffoldController);
 		$this->assertEqual($result->scaffold['controller'], '\slicedup_scaffold\tests\mocks\controllers\MockController');
 		$this->assertEqual(Scaffold::controller('posts'), '\slicedup_scaffold\tests\mocks\controllers\MockController');
+	}
+
+	public function testModelCalls(){
+		$expected = Scaffold::getAllFields('posts');
+		$result = Scaffold::getUpdateFields('posts');
+		$this->assertIdentical($expected, $result);
+
+		$expected = Scaffold::getFormFields('posts');
+		$result = Scaffold::getUpdateFormFields('posts');
+		$this->assertIdentical($expected, $result);
 	}
 
 	/**

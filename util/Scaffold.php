@@ -11,15 +11,26 @@ namespace slicedup_scaffold\util;
 use lithium\core\Libraries;
 use lithium\net\http\Media;
 use lithium\util\Inflector;
+use BadMethodCallException;
 
 class Scaffold extends \lithium\core\StaticObject {
 
+	/**
+	 * Scaffolding config
+	 *
+	 * @var array
+	 */
 	protected static $_config = array(
 		'all' => true,
 		'model' => array(),
 		'controller' => array()
 	);
 
+	/**
+	 * Scaffolded actions
+	 *
+	 * @var array
+	 */
 	protected static $_actions = array(
 		'index',
 		'view',
@@ -28,17 +39,52 @@ class Scaffold extends \lithium\core\StaticObject {
 		'delete'
 	);
 
+	/**
+	 * Scaffolds
+	 *
+	 * @var array
+	 */
 	protected static $_scaffold = array();
 
+	/**
+	 * Classes
+	 *
+	 * @var array
+	 */
 	protected static $_classes = array(
 		'controller' => '\slicedup_scaffold\controllers\ScaffoldController',
-		'model' => '\slicedup_scaffold\models\ScaffoldModel'
+		'model' => '\slicedup_scaffold\models\Scaffolds'
 	);
+
+	/**
+	 * Provide scaffold field set getters
+	 *
+	 * @param $method
+	 * @param $params
+	 */
+	public static function __callStatic($method, $params) {
+		preg_match('/^get(?P<fieldSet>\w+)Fields$/', $method, $args);
+		if (!$args) {
+			$message = "Method %s not defined or handled in class %s";
+			throw new BadMethodCallException(sprintf($message, $method, get_class()));
+		}
+		if (!isset($params[0])) {
+			$message = "Params not specified for method %s in class %s";
+			throw new BadMethodCallException(sprintf($message, $method, get_class()));
+		}
+		if (preg_match('/Form$/', $args['fieldSet'])) {
+			$method = 'getFormFieldSet';
+		} else {
+			$method = 'getFieldSet';
+		}
+		$args = array($params[0], $args['fieldSet']);
+		return static::invokeMethod($method, $args);
+	}
 
 	/**
 	 * Configure the Scaffold class
 	 *
-	 * @param unknown_type $config
+	 * @param array $config
 	 */
 	public static function config($config = array()){
 		if (is_bool($config)) {
@@ -57,8 +103,8 @@ class Scaffold extends \lithium\core\StaticObject {
 	/**
 	 * Set a Scaffold config
 	 *
-	 * @param unknown_type $name
-	 * @param unknown_type $config
+	 * @param string $name
+	 * @param array $config
 	 */
 	public static function set($name, $config = array()) {
 		if (is_array($name)) {
@@ -86,8 +132,9 @@ class Scaffold extends \lithium\core\StaticObject {
 	/**
 	 * Get a scaffold config
 	 *
-	 * @param unknown_type $name
-	 * @param unknown_type $fullConfig
+	 * @param string $name
+	 * @param boolean $fullConfig true return config with defaults || false
+	 * config options explicitly set only
 	 */
 	public static function get($name, $fullConfig = true) {
 		$name = static::_name($name);
@@ -112,8 +159,7 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * ScaffoldController instance for the current request if Scaffold is
 	 * configured to accept requests for that controller
 	 *
-	 * @param unknown_type $params
-	 * @return unknown
+	 * @param array $params
 	 */
 	public static function callable($params){
 		$options = array('request' => $params['request']) + $params['options'];
@@ -133,9 +179,9 @@ class Scaffold extends \lithium\core\StaticObject {
 	/**
 	 * Prepare Controller environment for scaffold
 	 *
-	 * @param unknown_type $name
+	 * @param string $name
 	 * @param \lithium\action\Controller $controller
-	 * @param unknown_type $params
+	 * @param array $params
 	 */
 	public static function prepareController($name, \lithium\action\Controller &$controller, $params){
 		if (!property_exists($controller, 'scaffold')) {
@@ -148,7 +194,7 @@ class Scaffold extends \lithium\core\StaticObject {
 		$config['controller'] = '\\' . get_class($controller);
 
 		$action = $params['params']['action'];
-		if (!method_exists($controller, $action) && static::action($name, $action)) {
+		if (!method_exists($controller, $action) && static::handledAction($name, $action)) {
 			$options = array('request' => $params['request']) + $params['options'];
 			$controller = static::_instance('controller', $options);
 		}
@@ -159,9 +205,11 @@ class Scaffold extends \lithium\core\StaticObject {
 	}
 
 	/**
+	 * Get controller class name for a scaffold
 	 *
-	 * @param unknown_type $name
-	 * @param unknown_type $default
+	 * @param string $name
+	 * @param boolean $default true return default controller classname if
+	 * class not found or configured
 	 */
 	public static function controller($name, $default = true) {
 		$config = static::get($name, false);
@@ -187,10 +235,23 @@ class Scaffold extends \lithium\core\StaticObject {
 	}
 
 	/**
+	 * Checks is an action is provided in the Scaffold config
 	 *
-	 * @param unknown_type $name
-	 * @param unknown_type $default
-	 * @return string|NULL
+	 * @todo integrate per config checking
+	 *
+	 * @param string $name
+	 * @param string $action
+	 */
+	public static function handledAction($name, $action) {
+		return in_array($action, static::$_actions);
+	}
+
+	/**
+	 * Get model class name for a scaffold
+	 *
+	 * @param string $name
+	 * @param boolean $default true return default model classname if class not
+	 * found or configured
 	 */
 	public static function model($name, $default = true) {
 		$config = static::get($name, false);
@@ -227,20 +288,50 @@ class Scaffold extends \lithium\core\StaticObject {
 	}
 
 	/**
-	 * Checks is an action is provided in the Scaffold config
+	 * Get a list of fields for use in a given scaffold context
 	 *
-	 * @todo integrate per config checking
-	 *
-	 * @param unknown_type $name
-	 * @param unknown_type $action
+	 * @param string $name
+	 * @param string $fieldset
 	 */
-	public static function action($name, $action) {
-		return in_array($action, static::$_actions);
+	public static function getFieldSet($name, $fieldset) {
+		$model = static::model($name);
+		if (!$model) {
+			return false;
+		}
+		return static::_getAllFields($model);
+	}
+
+	/**
+	 * Get a list of fields for use in a given scaffold form context with form
+	 * meta data to control scaffold form handling
+	 *
+	 * @param string $name
+	 * @param string $fieldset
+	 */
+	public static function getFormFieldSet($name, $fieldset){
+		$model = static::model($name);
+		if (!$model) {
+			return false;
+		}
+		return static::_getAllFields($model);
 	}
 
 	/**
 	 *
-	 * @param unknown_type $name
+	 * @param unknown_type $model
+	 */
+	protected static function _getAllFields($model) {
+		$schema = $model::schema();
+		$keys = array_keys($schema);
+		$fields = array_map('\lithium\util\Inflector::humanize', $keys);
+		return array_combine($keys, $fields);
+	}
+
+	/**
+	 * Get a default set of configuration options for a given scaffold based on
+	 * current scaffold config and scaffold name
+	 *
+	 * @param string $name
 	 */
 	public static function defaults($name) {
 		return array(
@@ -283,7 +374,7 @@ class Scaffold extends \lithium\core\StaticObject {
 	}
 
 	/**
-	 * Convert string to a scaffold config key
+	 * Convert string to a scaffold name
 	 *
 	 * @param string $name
 	 * @return string mixed

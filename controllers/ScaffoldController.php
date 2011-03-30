@@ -10,7 +10,6 @@ namespace slicedup_scaffold\controllers;
 
 use lithium\util\Inflector;
 use slicedup_scaffold\util\Scaffold;
-use slicedup_scaffold\models\ScaffoldModel;
 
 class ScaffoldController extends \lithium\action\Controller {
 
@@ -19,7 +18,7 @@ class ScaffoldController extends \lithium\action\Controller {
 	public function index() {
 		$vars = $this->_scaffoldVars();
 		extract($vars);
-		$fields = ScaffoldModel::getSummaryFields($model);
+		$fields = Scaffold::getSummaryFields($model);
 		$recordSet = $model::all();
 		$this->set(compact('recordSet', 'fields'));
 	}
@@ -27,7 +26,7 @@ class ScaffoldController extends \lithium\action\Controller {
 	public function view() {
 		$vars = $this->_scaffoldVars();
 		extract($vars);
-		$fields = ScaffoldModel::getDetailFields($model);
+		$fields = Scaffold::getDetailFields($model);
 		$record = $model::first($this->request->id);
 		if (!$record) {
 			$this->redirect(array('action' => 'index'));
@@ -38,7 +37,7 @@ class ScaffoldController extends \lithium\action\Controller {
 	public function add() {
 		$vars = $this->_scaffoldVars();
 		extract($vars);
-		$fields = ScaffoldModel::getCreateFields($model);
+		$fields = Scaffold::getCreateFields($model);
 		$record = $model::create();
 		if (($this->request->data) && $record->save($this->request->data)) {
 			$this->redirect(array('action' => 'index'));
@@ -49,7 +48,7 @@ class ScaffoldController extends \lithium\action\Controller {
 	public function edit() {
 		$vars = $this->_scaffoldVars();
 		extract($vars);
-		$fields = ScaffoldModel::getUpdateFields($model);
+		$fields = Scaffold::getUpdateFields($model);
 		$record = $model::find($this->request->id);
 		if (!$record) {
 			$this->redirect(array('action' => 'index'));
