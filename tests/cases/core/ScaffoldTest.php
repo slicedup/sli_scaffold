@@ -6,9 +6,9 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\tests\cases\util;
+namespace slicedup_scaffold\tests\cases\core;
 
-use slicedup_scaffold\util\Scaffold;
+use slicedup_scaffold\core\Scaffold;
 use lithium\tests\mocks\data\MockPost;
 use lithium\action\Request;
 use lithium\net\http\Router;

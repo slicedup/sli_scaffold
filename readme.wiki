@@ -97,7 +97,7 @@ using scaffolds without a model you have model access via the `Scaffold::model()
 method. Using the above example, this might look like:
 {{{
 namespace app\controlers;
-use slicedup_scaffold\util\Scaffold;
+use slicedup_scaffold\core\Scaffold;
 class PostsController extends \lithium\action\Controller {
 	public $scaffold; //populated with scaffold config at runtime
 	public function archives(){
@@ -127,7 +127,7 @@ request to scaffold `posts`, the following locations would checked in this order
 `{slicedup_scaffold}/views/scaffold/`  
 
 ####Configuration Options
-Scaffolding is controlled by configuring the `slicedup_scaffold\util\Scaffold`
+Scaffolding is controlled by configuring the `slicedup_scaffold\core\Scaffold`
 class, and additionally by setting options within your own controllers `scaffold`
 property.
 
@@ -147,7 +147,7 @@ scaffold requests
 #####Configuration Examples
 
 {{{
-use slicedup_scaffold\util\Scaffold;
+use slicedup_scaffold\core\Scaffold;
 
 //Global
 Scaffold::config(array(
