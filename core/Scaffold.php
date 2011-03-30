@@ -242,8 +242,15 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param string $name
 	 * @param string $action
 	 */
-	public static function handledAction($name, $action) {
-		return in_array($action, static::$_actions);
+	public static function handledAction($name, $action = null) {
+		if (!$config = static::get($name)) {
+			return false;
+		}
+		$actions = isset($config['actions']) ? (array) $config['actions'] : static::$_actions;
+		if (!isset($action)) {
+			return $actions;
+		}
+		return in_array($action, $actions);
 	}
 
 	/**
