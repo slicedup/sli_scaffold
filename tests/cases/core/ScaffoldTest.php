@@ -265,12 +265,14 @@ class ScaffoldTest extends \lithium\test\Unit {
 	}
 
 	public function testModelCalls(){
-		$expected = Scaffold::getAllFields('posts');
-		$result = Scaffold::getUpdateFields('posts');
+		$model = Scaffold::model('posts');
+
+		$expected = Scaffold::getAllFields($model);
+		$result = Scaffold::getUpdateFields($model);
 		$this->assertIdentical($expected, $result);
 
-		$expected = Scaffold::getFormFields('posts');
-		$result = Scaffold::getUpdateFormFields('posts');
+		$expected = Scaffold::getFormFields($model);
+		$result = Scaffold::getUpdateFormFields($model);
 		$this->assertIdentical($expected, $result);
 	}
 

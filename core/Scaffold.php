@@ -290,14 +290,10 @@ class Scaffold extends \lithium\core\StaticObject {
 	/**
 	 * Get a list of fields for use in a given scaffold context
 	 *
-	 * @param string $name
+	 * @param string $model
 	 * @param string $fieldset
 	 */
-	public static function getFieldSet($name, $fieldset) {
-		$model = static::model($name);
-		if (!$model) {
-			return false;
-		}
+	public static function getFieldSet($model, $fieldset) {
 		return static::_getAllFields($model);
 	}
 
@@ -305,14 +301,10 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * Get a list of fields for use in a given scaffold form context with form
 	 * meta data to control scaffold form handling
 	 *
-	 * @param string $name
+	 * @param string $model
 	 * @param string $fieldset
 	 */
-	public static function getFormFieldSet($name, $fieldset){
-		$model = static::model($name);
-		if (!$model) {
-			return false;
-		}
+	public static function getFormFieldSet($model, $fieldset){
 		return static::_getAllFields($model);
 	}
 
