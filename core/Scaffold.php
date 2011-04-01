@@ -366,7 +366,11 @@ class Scaffold extends \lithium\core\StaticObject {
 		//if (!empty($request->params['library'])) {
 		//	if ($library = Libraries::get($request->params['library'])) {}
 		//}
-		Media::type($controller->request->type(), null, array(
+		$type = $controller->request->type();
+		if ($type == 'form') {
+			$type = 'html';
+		}
+		Media::type($type, null, array(
 			'view' => '\lithium\template\View',
 			'paths' => $paths
 		));
