@@ -301,7 +301,10 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param string $fieldset
 	 */
 	public static function getFieldSet($model, $fieldset) {
-		return static::_getAllFields($model);
+		$schema = $model::schema();
+		$keys = array_keys($schema);
+		$fields = array_map('\lithium\util\Inflector::humanize', $keys);
+		return array_combine($keys, $fields);
 	}
 
 	/**
@@ -312,18 +315,26 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param string $fieldset
 	 */
 	public static function getFormFieldSet($model, $fieldset){
-		return array(static::_getAllFields($model));
+		$schema = $model::schema();
+		$fields = static::mapFormFields($schema);
+		return array($fields);
 	}
 
-	/**
-	 *
-	 * @param unknown_type $model
-	 */
-	protected static function _getAllFields($model) {
-		$schema = $model::schema();
-		$keys = array_keys($schema);
-		$fields = array_map('\lithium\util\Inflector::humanize', $keys);
-		return array_combine($keys, $fields);
+	public static function mapFormFields($schema){
+		$fields = array();
+		foreach ($schema as $field => $settings) {
+			switch($settings['type']){
+				case 'text':
+					$fields[$field] = array('type' => 'textarea');
+					break;
+				case 'boolean':
+					$fields[$field] = array('type' => 'checkbox');
+					break;
+				default;
+					$fields[] = $field;
+			}
+		}
+		return $fields;
 	}
 
 	/**
