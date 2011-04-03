@@ -46,6 +46,13 @@ class Scaffold extends \lithium\core\StaticObject {
 	 */
 	protected static $_scaffold = array();
 
+	protected static $_formMappings = array(
+		'default' => array(
+			'text' => array('type' => 'textarea'),
+			'boolean' => array('type' => 'checkbox')
+		)
+	);
+
 	/**
 	 * Classes
 	 *
@@ -314,24 +321,32 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param string $model
 	 * @param string $fieldset
 	 */
-	public static function getFormFieldSet($model, $fieldset){
+	public static function getFormFieldSet($model, $fieldset, $mapping = 'default'){
 		$schema = $model::schema();
-		$fields = static::mapFormFields($schema);
+		$fields = static::mapFormFields($schema, $mapping);
 		return array($fields);
 	}
 
-	public static function mapFormFields($schema){
+	/**
+	 * Apply form field mappings to a model schema
+	 *
+	 * @param array $schema
+	 * @param mixed $mapping
+	 */
+	public static function mapFormFields($schema, $mapping = 'default'){
 		$fields = array();
+		if (!is_array($mapping)) {
+			if (isset(static::$_formMappings[$mapping])) {
+				$mapping = static::$_formMappings[$mapping];
+			} else {
+				$mapping = static::$_formMappings['default'];
+			}
+		}
 		foreach ($schema as $field => $settings) {
-			switch($settings['type']){
-				case 'text':
-					$fields[$field] = array('type' => 'textarea');
-					break;
-				case 'boolean':
-					$fields[$field] = array('type' => 'checkbox');
-					break;
-				default;
-					$fields[] = $field;
+			if (isset($mapping[$settings['type']])) {
+				$fields[$field] = $mapping[$settings['type']];
+			} else {
+				$fields[] = $field;
 			}
 		}
 		return $fields;
