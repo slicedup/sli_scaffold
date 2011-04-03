@@ -10,7 +10,6 @@ namespace slicedup_scaffold\extensions\helper;
 
 use lithium\util\Set;
 use lithium\util\Inflector;
-use slicedup_scaffold\core\Scaffold as Scaffolder;
 
 class ScaffoldForm extends \lithium\template\Helper {
 
