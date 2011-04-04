@@ -32,17 +32,7 @@ Libraries::paths(array(
 
 class ScaffoldTest extends \lithium\test\Unit {
 
-	public function setUp() {
-		$this->_configs = Connections::config();
-		Connections::config($this->_configs + array('mock-source' => array(
-			'type' => 'lithium\tests\mocks\data\MockSource'
-		)));
-		MockPost::config();
-	}
-
 	public function tearDown() {
-		Connections::config(array('mock-source' => false));
-		Connections::config($this->_configs);
 		$config = Scaffold::config();
 		Scaffold::config(array('all' => true));
 		if (!empty($config['scaffold'])) {

@@ -15,26 +15,15 @@ use lithium\data\Connections;
 
 class ModelTest extends \lithium\test\Unit {
 
-	protected $_post = 'slicedup_scaffold\tests\mocks\data\MockPost';
-
-	public function setUp() {
-		$this->_configs = Connections::config();
-		Connections::config($this->_configs + array('mock-source' => array(
-			'type' => 'lithium\tests\mocks\data\MockSource'
-		)));
-		$post = $this->_post;
-		$post::config();
-	}
+	protected $_model = 'slicedup_scaffold\tests\mocks\data\MockPost';
 
 	public function tearDown() {
-		Connections::config(array('mock-source' => false));
-		Connections::config($this->_configs);
-		$post = $this->_post;
+		$post = $this->_model;
 		$post::flush();
 	}
 
 	public function testUnsetScaffoldFields() {
-		$post = $this->_post;
+		$post = $this->_model;
 		$schema = $post::schema();
 		$fields = Model::getFields($post);
 		$expected = array_keys($schema);
@@ -63,7 +52,7 @@ class ModelTest extends \lithium\test\Unit {
 	}
 
 	public function testScaffoldFields() {
-		$post = $this->_post;
+		$post = $this->_model;
 		$setScaffoldFields = array('id', 'title', 'body', 'status');
 		$instance = $post::invokeMethod('_object');
 		$instance->scaffoldFields = $setScaffoldFields;
@@ -115,7 +104,7 @@ class ModelTest extends \lithium\test\Unit {
 	}
 
 	public function testUnsetScaffoldFormFields() {
-		$post = $this->_post;
+		$post = $this->_model;
 		$schema = $post::schema();
 		$fields = Model::getFormFields($post);
 		$expected = array(Model::mapFormFields($schema));

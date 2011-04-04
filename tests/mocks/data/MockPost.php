@@ -8,7 +8,16 @@
 
 namespace slicedup_scaffold\tests\mocks\data;
 
-class MockPost extends \lithium\tests\mocks\data\MockBase {
+class MockPost extends \lithium\data\Model {
+
+	protected $_schema = array(
+		'id' => array('type' => 'integer'),
+		'author_id' => array('type' => 'integer'),
+		'title' => array('type' => 'string'),
+		'body' => array('type' => 'text'),
+		'created' => array('type' => 'datetime'),
+		'updated' => array('type' => 'datetime')
+	);
 
 	public static function flush() {
 		static::$_instances = array();
