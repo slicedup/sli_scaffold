@@ -8,6 +8,8 @@
 
 namespace slicedup_scaffold\core;
 
+use lithium\util;
+
 use lithium\core\Libraries;
 use lithium\net\http\Media;
 use lithium\util\Inflector;
@@ -46,12 +48,16 @@ class Scaffold extends \lithium\core\StaticObject {
 	 */
 	protected static $_scaffold = array();
 
-	protected static $_formMappings = array(
+	protected static $_formFieldMappings = array(
 		'default' => array(
 			'text' => array('type' => 'textarea'),
 			'boolean' => array('type' => 'checkbox')
 		)
 	);
+
+	protected static $_formFieldsMapped = array();
+
+	protected static $_fieldsMapped = array();
 
 	/**
 	 * Classes
@@ -307,11 +313,40 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param string $model
 	 * @param string $fieldset
 	 */
-	public static function getFieldSet($model, $fieldset) {
-		$schema = $model::schema();
-		$keys = array_keys($schema);
-		$fields = array_map('\lithium\util\Inflector::humanize', $keys);
-		return array_combine($keys, $fields);
+	public static function getFieldSet($model, $fieldset = null) {
+		if (!$fieldset) {
+			$fieldset = 'scaffold';
+		}
+		$setName = Inflector::camelize($fieldset, false) . 'Fields';
+		if (isset(static::$_fieldsMapped[$model][$setName])) {
+			return static::$_fieldsMapped[$model][$setName];
+		}
+
+		$_model = $model::invokeMethod('_object');
+		if (isset($_model->{$setName})) {
+			$_fields = $_model->{$setName};
+		} elseif (isset($_model->scaffoldFields)) {
+			$_fields = $_model->scaffoldFields;
+		}
+
+		if (isset($_fields)) {
+			$fields = array();
+			foreach ($_fields as $field => $name) {
+				if (is_int($field)) {
+					$field = $name;
+					$name = Inflector::humanize($name);
+				}
+				$fields[$field] = $name;
+			}
+		} else {
+			$schema = $model::schema();
+			$keys = array_keys($schema);
+			$fieldsNames = array_map('\lithium\util\Inflector::humanize', $keys);
+			$fields = array_combine($keys, $fieldsNames);
+		}
+
+		static::$_fieldsMapped[$model][$setName] = $fields;
+		return $fields;
 	}
 
 	/**
@@ -321,10 +356,33 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param string $model
 	 * @param string $fieldset
 	 */
-	public static function getFormFieldSet($model, $fieldset, $mapping = 'default'){
+	public static function getFormFieldSet($model, $fieldset = null, $mapping = 'default'){
+		if (!$fieldset || strtolower($fieldset) == 'form') {
+			$fieldset = 'scaffoldForm';
+		}
+		$setName = Inflector::camelize($fieldset, false) . 'Fields';
+		if (isset(static::$_formFieldsMapped[$model][$setName])) {
+			return static::$_formFieldsMapped[$model][$setName];
+		}
+
+		$_model = $model::invokeMethod('_object');
+		if (isset($_model->{$setName})) {
+			$fields = $_model->{$setName};
+		} elseif (isset($_model->scaffoldFormFields)) {
+			$fields = $_model->scaffoldFormFields;
+		}
+
 		$schema = $model::schema();
-		$fields = static::mapFormFields($schema, $mapping);
-		return array($fields);
+		if (isset($fields)) {
+			foreach ($fields as &$fieldset) {
+				$fieldset = static::mapFormFields($schema, $mapping, $fieldset);
+			}
+		} else {
+			$fields = array(static::mapFormFields($schema, $mapping));
+		}
+
+		static::$_formFieldsMapped[$model][$setName] = $fields;
+		return $fields;
 	}
 
 	/**
@@ -332,19 +390,29 @@ class Scaffold extends \lithium\core\StaticObject {
 	 *
 	 * @param array $schema
 	 * @param mixed $mapping
+	 * @param array $fieldset
 	 */
-	public static function mapFormFields($schema, $mapping = 'default'){
+	public static function mapFormFields($schema, $mapping = 'default', $fieldset = array()){
 		$fields = array();
 		if (!is_array($mapping)) {
-			if (isset(static::$_formMappings[$mapping])) {
-				$mapping = static::$_formMappings[$mapping];
+			if (isset(static::$_formFieldMappings[$mapping])) {
+				$mapping = static::$_formFieldMappings[$mapping];
 			} else {
-				$mapping = static::$_formMappings['default'];
+				$mapping = static::$_formFieldMappings['default'];
 			}
 		}
 		foreach ($schema as $field => $settings) {
+			if (!empty($fieldset)) {
+				if (!isset($fieldset[$field]) && !in_array($field, $fieldset)) {
+					continue;
+				}
+			}
 			if (isset($mapping[$settings['type']])) {
-				$fields[$field] = $mapping[$settings['type']];
+				$fields[$field] = array();
+				if (isset($fieldset[$field])) {
+					$fields[$field] = $fieldset[$field];
+				}
+				$fields[$field]+= $mapping[$settings['type']];
 			} else {
 				$fields[] = $field;
 			}
