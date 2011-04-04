@@ -8,5 +8,8 @@
 
 namespace slicedup_scaffold\tests\cases\extensions\helper;
 
-class ScaffoldFormTest extends \lithium\test\Unit {}
+class ScaffoldFormTest extends \lithium\test\Unit {
+
+}
+
 ?>

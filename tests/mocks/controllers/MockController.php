@@ -12,7 +12,10 @@ class MockController extends \lithium\action\Controller {
 
 	public $scaffold;
 
-	public function index() {}
+	public function index() {
+
+	}
 
 }
+
 ?>

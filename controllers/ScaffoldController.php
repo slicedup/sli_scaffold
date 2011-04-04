@@ -81,5 +81,7 @@ class ScaffoldController extends \lithium\action\Controller {
 		$this->set($vars);
 		return $vars;
 	}
+
 }
+
 ?>

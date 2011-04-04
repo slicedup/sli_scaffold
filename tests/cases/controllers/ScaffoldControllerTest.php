@@ -8,5 +8,8 @@
 
 namespace slicedup_scaffold\tests\cases\controllers;
 
-class ScaffoldControllerTest extends \lithium\test\Unit {}
+class ScaffoldControllerTest extends \lithium\test\Unit {
+
+}
+
 ?>

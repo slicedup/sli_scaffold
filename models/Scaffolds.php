@@ -8,5 +8,8 @@
 
 namespace slicedup_scaffold\models;
 
-class Scaffolds extends \lithium\data\Model {}
+class Scaffolds extends \lithium\data\Model {
+
+}
+
 ?>

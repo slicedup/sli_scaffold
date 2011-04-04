@@ -290,4 +290,5 @@ class ScaffoldTest extends \lithium\test\Unit {
 	}
 
 }
+
 ?>

@@ -140,4 +140,5 @@ class ModelTest extends \lithium\test\Unit {
 	}
 
 }
+
 ?>

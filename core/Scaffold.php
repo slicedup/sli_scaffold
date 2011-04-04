@@ -345,5 +345,7 @@ class Scaffold extends \lithium\core\StaticObject {
 		$name = preg_replace('/^app_|_controller(s)?/', '', $name);
 		return $name;
 	}
+
 }
+
 ?>

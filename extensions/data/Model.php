@@ -276,5 +276,7 @@ class Model extends \lithium\data\Model {
 		}
 		return $fields;
 	}
+
 }
+
 ?>
