@@ -264,14 +264,12 @@ class Model extends \lithium\data\Model {
 					continue;
 				}
 			}
+			$fields[$field] = array();
 			if (isset($mapping[$settings['type']])) {
-				$fields[$field] = array();
 				if (isset($fieldset[$field])) {
 					$fields[$field] = $fieldset[$field];
 				}
 				$fields[$field]+= $mapping[$settings['type']];
-			} else {
-				$fields[] = $field;
 			}
 		}
 		return $fields;
