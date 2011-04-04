@@ -20,9 +20,7 @@ class ScaffoldForm extends \lithium\template\Helper {
 	/**
 	 * Scaffolded form for adding/editing records
 	 *
-	 * @todo there has to be a better way of getting the current url from
-	 * the request object
-	 * @todo fieldset options
+	 * @todo fieldset & field classes
 	 *
 	 * @param Record $record
 	 * @param array $fields
@@ -42,12 +40,14 @@ class ScaffoldForm extends \lithium\template\Helper {
 			}
 			if (empty($fields)) {
 				$scaffold = $this->_classes['scaffold'];
-				$fields = $scaffold::mapFormFields($record->schema());
+				$action = $record->exists() ? 'Update' : 'Create';
+				$getter = "get{$action}FormFields";
+				$fields = $scaffold::$getter($record->model());
 			}
 		}
 
 		$params = Set::merge(array(
-			'url' => $_REQUEST['url']
+			'url' => $context->request()->url
 		), $params);
 		$fields = $this->_formatFormFields($fields, $params, $key);
 
@@ -55,6 +55,11 @@ class ScaffoldForm extends \lithium\template\Helper {
 		$filter = function($self, $params) use ($context) {
 			extract($context->data());
 			extract($params);
+			if (!isset($t)) {
+				$t = function ($value) {
+					return $value;
+				};
+			}
 
 			$output = $context->form->create($record, $params);
 			foreach ($fields as $fieldset => $_fields) {
