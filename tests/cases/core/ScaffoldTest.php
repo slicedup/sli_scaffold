@@ -9,7 +9,7 @@
 namespace slicedup_scaffold\tests\cases\core;
 
 use slicedup_scaffold\core\Scaffold;
-use lithium\tests\mocks\data\MockPost;
+use slicedup_scaffold\tests\mocks\data\MockPost;
 use lithium\action\Request;
 use lithium\net\http\Router;
 use lithium\action\Dispatcher;
@@ -25,7 +25,7 @@ Libraries::paths(array(
 	)),
 	'models' => Set::merge((array) Libraries::paths('models'), array(
 		'{:library}\tests\mocks\data\{:name}' => array(
-			'libraries' => array('lithium')
+			'libraries' => array('slicedup_scaffold')
 		)
 	))
 ));
@@ -182,7 +182,7 @@ class ScaffoldTest extends \lithium\test\Unit {
 		$this->assertIdentical($expected, Scaffold::model('posts'));
 
 		$config = array(
-			'model' => '\lithium\tests\mocks\data\MockPost'
+			'model' => '\slicedup_scaffold\tests\mocks\data\MockPost'
 		);
 		Scaffold::set('posts', $config);
 		$expected = $config['model'];
@@ -192,7 +192,7 @@ class ScaffoldTest extends \lithium\test\Unit {
 			'model' => 'MockPost'
 		);
 		Scaffold::set('posts', $config);
-		$expected = '\lithium\tests\mocks\data\MockPost';
+		$expected = '\slicedup_scaffold\tests\mocks\data\MockPost';
 		$this->assertIdentical($expected, Scaffold::model('posts'));
 		$meta = $expected::meta();
 		$this->assertEqual('MockPost', $meta['name']);
