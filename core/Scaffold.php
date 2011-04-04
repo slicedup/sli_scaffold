@@ -8,8 +8,7 @@
 
 namespace slicedup_scaffold\core;
 
-use lithium\util;
-
+use slicedup_scaffold\extensions\data\Model;
 use lithium\core\Libraries;
 use lithium\net\http\Media;
 use lithium\util\Inflector;
@@ -48,17 +47,6 @@ class Scaffold extends \lithium\core\StaticObject {
 	 */
 	protected static $_scaffold = array();
 
-	protected static $_formFieldMappings = array(
-		'default' => array(
-			'text' => array('type' => 'textarea'),
-			'boolean' => array('type' => 'checkbox')
-		)
-	);
-
-	protected static $_formFieldsMapped = array();
-
-	protected static $_fieldsMapped = array();
-
 	/**
 	 * Classes
 	 *
@@ -76,22 +64,11 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param $params
 	 */
 	public static function __callStatic($method, $params) {
-		preg_match('/^get(?P<fieldSet>\w+)Fields$/', $method, $args);
-		if (!$args) {
+		if (!preg_match('/^get\w+Fields$/', $method)) {
 			$message = "Method %s not defined or handled in class %s";
 			throw new BadMethodCallException(sprintf($message, $method, get_class()));
 		}
-		if (!isset($params[0])) {
-			$message = "Params not specified for method %s in class %s";
-			throw new BadMethodCallException(sprintf($message, $method, get_class()));
-		}
-		if (preg_match('/Form$/', $args['fieldSet'])) {
-			$method = 'getFormFieldSet';
-		} else {
-			$method = 'getFieldSet';
-		}
-		$args = array($params[0], $args['fieldSet']);
-		return static::invokeMethod($method, $args);
+		return Model::invokeMethod($method, $params);
 	}
 
 	/**
@@ -308,119 +285,6 @@ class Scaffold extends \lithium\core\StaticObject {
 	}
 
 	/**
-	 * Get a list of fields for use in a given scaffold context
-	 *
-	 * @param string $model
-	 * @param string $fieldset
-	 */
-	public static function getFieldSet($model, $fieldset = null) {
-		if (!$fieldset) {
-			$fieldset = 'scaffold';
-		}
-		$setName = Inflector::camelize($fieldset, false) . 'Fields';
-		if (isset(static::$_fieldsMapped[$model][$setName])) {
-			return static::$_fieldsMapped[$model][$setName];
-		}
-
-		$_model = $model::invokeMethod('_object');
-		if (isset($_model->{$setName})) {
-			$_fields = $_model->{$setName};
-		} elseif (isset($_model->scaffoldFields)) {
-			$_fields = $_model->scaffoldFields;
-		}
-
-		if (isset($_fields)) {
-			$fields = array();
-			foreach ($_fields as $field => $name) {
-				if (is_int($field)) {
-					$field = $name;
-					$name = Inflector::humanize($name);
-				}
-				$fields[$field] = $name;
-			}
-		} else {
-			$schema = $model::schema();
-			$keys = array_keys($schema);
-			$fieldsNames = array_map('\lithium\util\Inflector::humanize', $keys);
-			$fields = array_combine($keys, $fieldsNames);
-		}
-
-		static::$_fieldsMapped[$model][$setName] = $fields;
-		return $fields;
-	}
-
-	/**
-	 * Get a list of fields for use in a given scaffold form context with form
-	 * meta data to control scaffold form handling
-	 *
-	 * @param string $model
-	 * @param string $fieldset
-	 */
-	public static function getFormFieldSet($model, $fieldset = null, $mapping = 'default'){
-		if (!$fieldset || strtolower($fieldset) == 'form') {
-			$fieldset = 'scaffoldForm';
-		}
-		$setName = Inflector::camelize($fieldset, false) . 'Fields';
-		if (isset(static::$_formFieldsMapped[$model][$setName])) {
-			return static::$_formFieldsMapped[$model][$setName];
-		}
-
-		$_model = $model::invokeMethod('_object');
-		if (isset($_model->{$setName})) {
-			$fields = $_model->{$setName};
-		} elseif (isset($_model->scaffoldFormFields)) {
-			$fields = $_model->scaffoldFormFields;
-		}
-
-		$schema = $model::schema();
-		if (isset($fields)) {
-			foreach ($fields as &$fieldset) {
-				$fieldset = static::mapFormFields($schema, $mapping, $fieldset);
-			}
-		} else {
-			$fields = array(static::mapFormFields($schema, $mapping));
-		}
-
-		static::$_formFieldsMapped[$model][$setName] = $fields;
-		return $fields;
-	}
-
-	/**
-	 * Apply form field mappings to a model schema
-	 *
-	 * @param array $schema
-	 * @param mixed $mapping
-	 * @param array $fieldset
-	 */
-	public static function mapFormFields($schema, $mapping = 'default', $fieldset = array()){
-		$fields = array();
-		if (!is_array($mapping)) {
-			if (isset(static::$_formFieldMappings[$mapping])) {
-				$mapping = static::$_formFieldMappings[$mapping];
-			} else {
-				$mapping = static::$_formFieldMappings['default'];
-			}
-		}
-		foreach ($schema as $field => $settings) {
-			if (!empty($fieldset)) {
-				if (!isset($fieldset[$field]) && !in_array($field, $fieldset)) {
-					continue;
-				}
-			}
-			if (isset($mapping[$settings['type']])) {
-				$fields[$field] = array();
-				if (isset($fieldset[$field])) {
-					$fields[$field] = $fieldset[$field];
-				}
-				$fields[$field]+= $mapping[$settings['type']];
-			} else {
-				$fields[] = $field;
-			}
-		}
-		return $fields;
-	}
-
-	/**
 	 * Get a default set of configuration options for a given scaffold based on
 	 * current scaffold config and scaffold name
 	 *
@@ -428,7 +292,7 @@ class Scaffold extends \lithium\core\StaticObject {
 	 */
 	public static function defaults($name) {
 		return array(
-			'controller' => self::controller($name, false) ?: null,
+			'controller' => static::controller($name, false) ?: null,
 			'model' => static::model($name, false) ?: null
 		);
 	}
