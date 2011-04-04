@@ -8,6 +8,12 @@
 
 namespace slicedup_scaffold\models;
 
+/**
+ * The `Scaffolds` model class is used as a model stub to access datasources
+ * for undefined models in the scaffold. It is a temporary measure, and should
+ * not be referred to directly for any reason.
+ *
+ */
 class Scaffolds extends \lithium\data\Model {
 
 }
