@@ -8,8 +8,7 @@
 
 namespace slicedup_scaffold\tests\cases\extensions\data;
 
-use slicedup_scaffold\extensions\data;
-
+use slicedup_scaffold\core\Scaffold;
 use slicedup_scaffold\extensions\data\Model;
 use lithium\data\Connections;
 
@@ -107,7 +106,7 @@ class ModelTest extends \lithium\test\Unit {
 		$post = $this->_model;
 		$schema = $post::schema();
 		$fields = Model::getFormFields($post);
-		$expected = array(Model::mapFormFields($schema));
+		$expected = array(Model::invokeMethod('_mapFormFields', array($post)));
 		$this->assertEqual($expected, $fields);
 
 		$scaffoldFields = Model::getScaffoldFormFields($post);

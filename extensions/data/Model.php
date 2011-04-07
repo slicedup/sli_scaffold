@@ -153,25 +153,20 @@ class Model extends \lithium\data\Model {
 	 */
 	public static function __callStatic($method, $params) {
 		preg_match('/^get(?P<set>\w+)Fields$/', $method, $args);
-		if ($args) {
-			if (!isset($params[0])) {
-				$model = get_called_class();
-				if (get_called_class() == __CLASS__) {
-					$message = "Params not specified for method %s in class %s";
-					throw new BadMethodCallException(sprintf($message, $method, get_class()));
-				}
-			} else {
-				$model = $params[0];
-			}
-			if (preg_match('/Form$/', $args['set'])) {
-				$method = 'getFormFields';
-			} else {
-				$method = 'getFields';
-			}
-			$args = array($model, $args['set']);
-			return static::invokeMethod($method, $args);
+		if (!$args) {
+			return parent::__callStatic($method, $params);
 		}
-		return parent::__callStatic($method, $params);
+
+		$model = isset($params[0]) ? $params[0] : get_called_class();
+		if ($model == __CLASS__) {
+			$message = "Params not specified for method %s in class %s";
+			throw new BadMethodCallException(sprintf($message, $method, get_class()));
+		}
+
+		extract($args);
+		$method = preg_match('/Form$/', $set) ? 'getFormFields' : 'getFields';
+		$mapping = isset($params[1]) ? $params[1] : null;
+		return static::invokeMethod($method, array($model, $set, $mapping));
 	}
 
 	/**
@@ -218,11 +213,11 @@ class Model extends \lithium\data\Model {
 	 * @param string $model
 	 * @param string $fieldset
 	 */
-	public static function getFormFields($model, $fieldset = null, $mapping = 'default'){
+	public static function getFormFields($model, $fieldset = null, $mapping = null){
 		if (!$fieldset || strtolower($fieldset) == 'form') {
-			$fieldset = 'scaffoldForm';
+			$fieldset = 'scaffold';
 		}
-		$setName = Inflector::camelize($fieldset, false) . 'Fields';
+		$setName = Inflector::camelize($fieldset, false) . 'FormFields';
 		$_model = $model::invokeMethod('_object');
 		if (isset($_model->{$setName})) {
 			$fields = $_model->{$setName};
@@ -230,17 +225,28 @@ class Model extends \lithium\data\Model {
 			$fields = $_model->scaffoldFormFields;
 		}
 
-		$schema = $model::schema();
 		if (isset($fields)) {
 			foreach ($fields as &$fieldset) {
-				$fieldset = static::mapFormFields($schema, $mapping, $fieldset);
+				$fieldset = static::_mapFormFields($model, $fieldset, $mapping);
 			}
 		} else {
-			$fields = array(static::mapFormFields($schema, $mapping));
+			$fields = array(static::_mapSchemaFields($model, $mapping));
 		}
 
 		return $fields;
 	}
+
+	public static function getFieldMapping($mapping) {
+		if (!isset($mapping)) {
+			$mapping = key(static::$_formFieldMappings);
+		}
+		if (isset(static::$_formFieldMappings[$mapping])) {
+			return static::$_formFieldMappings[$mapping];
+		}
+		return array();
+	}
+
+	public function setFieldMapping($mapping, $fields = array()) {}
 
 	/**
 	 * Apply form field mappings to a model schema
@@ -249,26 +255,39 @@ class Model extends \lithium\data\Model {
 	 * @param mixed $mapping
 	 * @param array $fieldset
 	 */
-	public static function mapFormFields($schema, $mapping = 'default', $fieldset = array()){
-		$fields = array();
+	protected static function _mapFormFields($model, $fieldset = array(), $mapping = null){
 		if (!is_array($mapping)) {
-			if (isset(static::$_formFieldMappings[$mapping])) {
-				$mapping = static::$_formFieldMappings[$mapping];
-			} else {
-				$mapping = static::$_formFieldMappings['default'];
-			}
+			$mapping = static::getFieldMapping($mapping);
 		}
-		foreach ($schema as $field => $settings) {
-			if (!empty($fieldset)) {
-				if (!isset($fieldset[$field]) && !in_array($field, $fieldset)) {
-					continue;
-				}
+		if (!$fieldset) {
+			return static::_mapSchemaFields($model, $mapping);
+		}
+		$schema = $model::schema();
+		$fields = array();
+		foreach ($fieldset as $field => $settings) {
+			if (is_int($field)) {
+				$field = current((array) $settings);
+				$settings = array();
 			}
 			$fields[$field] = array();
+			$type = isset($schema[$field]) ? $schema[$field]['type'] : null;
+			if ($type && isset($mapping[$type])) {
+				$fields[$field] = $mapping[$type];
+			}
+			$fields[$field]+= $settings;
+		}
+		return $fields;
+	}
+
+	protected static function _mapSchemaFields($model, $mapping = null) {
+		if (!is_array($mapping)) {
+			$mapping = static::getFieldMapping($mapping);
+		}
+		$schema = $model::schema();
+		$fields = array();
+		foreach ($schema as $field => $settings) {
+			$fields[$field] = array();
 			if (isset($mapping[$settings['type']])) {
-				if (isset($fieldset[$field])) {
-					$fields[$field] = $fieldset[$field];
-				}
 				$fields[$field]+= $mapping[$settings['type']];
 			}
 		}
