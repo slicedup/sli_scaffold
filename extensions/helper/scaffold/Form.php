@@ -135,10 +135,14 @@ class Form extends \lithium\util\Collection {
 	public function addFieldset($config = array(), $key = null) {
 		if (!is_object($config)) {
 			$class = $this->_classes['fieldset'];
+			if (!isset($config['legend'])) {
+				$config['legend'] = !is_int($key) ? $key : null;
+			}
 			$fieldset = new $class($config);
 		} else {
 			$fieldset = $config;
 		}
+		$fieldset->form($this);
 		if (is_null($key)) {
 			return $this->_data[] = $fieldset;
 		}

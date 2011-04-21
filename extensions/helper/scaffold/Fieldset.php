@@ -118,10 +118,14 @@ class Fieldset extends \lithium\util\Collection {
 			}
 			$field = new $class($name);
 		} else {
+			if (!is_array($config)) {
+				$config = array();
+			}
 			$key = $name;
 			$config['name'] = $name;
 			$field = new $class($config);
 		}
+		$field->fieldset($this);
 		if (is_null($key)) {
 			return $this->_data[] = $field;
 		}
