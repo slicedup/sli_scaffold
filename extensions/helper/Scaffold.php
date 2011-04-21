@@ -11,20 +11,60 @@ namespace slicedup_scaffold\extensions\helper;
 use lithium\util\Set;
 use lithium\util\Inflector;
 
-class ScaffoldForm extends \lithium\template\Helper {
+class Scaffold extends \lithium\template\Helper {
 
 	protected $_classes = array(
-		'scaffold' => 'slicedup_scaffold\core\Scaffold'
+		'scaffold' => '\slicedup_scaffold\core\Scaffold',
+		'form' => '\slicedup_scaffold\extensions\helper\scaffold\Form'
 	);
 
 	/**
 	 * Scaffolded form for adding/editing records
 	 *
-	 * @todo fieldset & field classes
+	 * @param mixed $form
+	 * @param mixed $binding
+	 * @param array $options
+	 */
+	public function form($form = array(), $binding = null, $options = array()) {
+		$formClass = $this->_classes['form'];
+		if ($form instanceOf $formClass) {
+			$formInstance = $form;
+			$formInstance->config($options);
+			$formInstance->binding($binding);
+		} else {
+			$formInstance = $this->formInstance($form, $binding, $options);
+		}
+		if (!$formInstance->context()) {
+			$formInstance->context($this->_context);
+		}
+		return $formInstance->render();
+	}
+
+	/**
+	 * Scaffold form class instance
 	 *
-	 * @param Record $record
 	 * @param array $fields
-	 * @param array $params form params
+	 * @param mixed $binding
+	 * @param array $options
+	 */
+	public function formInstance($fields = array(), $binding = null, $options = array()) {
+		$formClass = $this->_classes['form'];
+		if (!isset($options['binding'])) {
+			$options['binding'] = $binding;
+		}
+		if ($options['binding'] && empty($fields) && $fields !== false) {
+			$scaffold = $this->_classes['scaffold'];
+			//@todo support for collection (exists n/a)
+			$action = $options['binding']->exists() ? 'Update' : 'Create';
+			$getter = "get{$action}FormFields";
+			$fields = $scaffold::$getter($options['binding']->model());
+		}
+		$options['data'] = $fields;
+		return new $formClass($options);
+	}
+
+	/**
+	 * @deprecated
 	 */
 	public function create($record = null, $fields = array(), $params = array()) {
 		$context = $this->_context;
@@ -50,7 +90,6 @@ class ScaffoldForm extends \lithium\template\Helper {
 			'url' => $context->request()->url
 		), $params);
 		$fields = $this->_formatFormFields($fields, $params, $key);
-
 		$params = compact('record', 'fields', 'params');
 		$filter = function($self, $params) use ($context) {
 			extract($context->data());
@@ -63,8 +102,10 @@ class ScaffoldForm extends \lithium\template\Helper {
 
 			$output = $context->form->create($record, $params);
 			foreach ($fields as $fieldset => $_fields) {
+				$fieldset = $_fields['legend'];
+				$_fields = $_fields['fields'];
 				$content = '';
-				if (!is_int($fieldset)) {
+				if ($fieldset) {
 					$content.= $self->invokeMethod('_render', array(
 						'legend',
 						'legend',
@@ -94,11 +135,18 @@ class ScaffoldForm extends \lithium\template\Helper {
 		return $this->_filter(__METHOD__, $params, $filter);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	protected function _formatFormFields($fields, &$params = array(), $key = null) {
 		$fieldsets = array();
 		foreach ($fields as $fieldset => $_fields) {
 			$fieldsets[$fieldset] = array();
-			foreach ($_fields as $field => $options){
+			if (!isset($_fields['legend'])) {
+				$_fields['legend'] = !is_int($fieldset) ? $fieldset : null;
+			}
+			$fieldsets[$fieldset]['legend'] = $_fields['legend'];
+			foreach ($_fields['fields'] as $field => $options){
 				if (!is_array($options)) {
 					if (is_int($field)) {
 						$field = $options;
@@ -119,7 +167,7 @@ class ScaffoldForm extends \lithium\template\Helper {
 				if (!empty($options['type']) && $options['type'] == 'file') {
 					$params['type'] = 'file';
 				}
-				$fieldsets[$fieldset][$field] = $options;
+				$fieldsets[$fieldset]['fields'][$field] = $options;
 			}
 		}
 		return $fieldsets;

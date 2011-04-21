@@ -106,7 +106,12 @@ class ModelTest extends \lithium\test\Unit {
 		$post = $this->_model;
 		$schema = $post::schema();
 		$fields = Model::getFormFields($post);
-		$expected = array(Model::invokeMethod('_mapFormFields', array($post)));
+		$expected = array(
+			array(
+				'legend' => null,
+				'fields' => Model::invokeMethod('_mapFormFields', array($post))
+			)
+		);
 		$this->assertEqual($expected, $fields);
 
 		$scaffoldFields = Model::getScaffoldFormFields($post);

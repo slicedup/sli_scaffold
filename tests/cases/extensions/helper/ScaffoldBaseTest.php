@@ -8,18 +8,18 @@
 
 namespace slicedup_scaffold\tests\cases\extensions\helper;
 
-use slicedup_scaffold\extensions\helper\ScaffoldForm;
+use slicedup_scaffold\extensions\helper\Scaffold as ScaffoldHelper;
 use slicedup_scaffold\core\Scaffold;
 use lithium\action\Request;
 use lithium\net\http\Router;
 use lithium\data\entity\Record;
 use lithium\tests\mocks\template\helper\MockFormRenderer;
 
-class ScaffoldFormTest extends \lithium\test\Unit {
+class ScaffoldBaseTest extends \lithium\test\Unit {
 
 	protected $_model = 'lithium\tests\mocks\template\helper\MockFormPost';
 
-	public $form = null;
+	public $helper = null;
 
 	public $context = null;
 
@@ -42,7 +42,7 @@ class ScaffoldFormTest extends \lithium\test\Unit {
 		$request->persist = array('controller');
 
 		$this->context = new MockFormRenderer(compact('request'));
-		$this->form = new ScaffoldForm(array('context' => $this->context));
+		$this->helper = new ScaffoldHelper(array('context' => $this->context));
 
 		$base = trim($this->context->request()->env('base'), '/') . '/';
 		$this->base = ($base == '/') ? $base : '/' . $base;
@@ -55,25 +55,6 @@ class ScaffoldFormTest extends \lithium\test\Unit {
 			Router::connect($route);
 		}
 	}
-
-	public function testUnconfiguredScaffold() {
-		$model = $this->_model;
-		$record = $model::create();
-		$result = $this->form->create($record);
-
-		$this->assertTags($result, array(
-			'form' => array(
-				'action' => $this->context->request()->url,
-				'method' => 'post'
-			),
-			'fieldset' => array()
-		));
-		$fields = Scaffold::getFormFields($model);
-		foreach ($fields[0] as $field => $params) {
-			$this->assertPattern('/name="'.$field.'"/', $result);
-		}
-	}
-
 }
 
 ?>

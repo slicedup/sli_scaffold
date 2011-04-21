@@ -34,6 +34,7 @@ class Model extends \lithium\data\Model {
 
 	protected static $_formFieldMappings = array(
 		'default' => array(
+			'__key' => array('method' => 'hidden'),
 			'text' => array('type' => 'textarea'),
 			'boolean' => array('type' => 'checkbox')
 		)
@@ -226,11 +227,24 @@ class Model extends \lithium\data\Model {
 		}
 
 		if (isset($fields)) {
-			foreach ($fields as &$fieldset) {
-				$fieldset = static::_mapFormFields($model, $fieldset, $mapping);
+			foreach ($fields as $key => &$fieldset) {
+				if (!isset($fieldset['fields'])) {
+					$fieldset = array(
+						'fields' => $fieldset
+					);
+				}
+				$fieldset['fields'] = static::_mapFormFields($model, $fieldset['fields'], $mapping);
+				if (!isset($fieldset['legend'])) {
+					$fieldset['legend'] = !is_int($key) ? $key : null;
+				}
 			}
 		} else {
-			$fields = array(static::_mapSchemaFields($model, $mapping));
+			$fields = array(
+				array(
+					'legend' => null,
+					'fields' => static::_mapSchemaFields($model, $mapping)
+				)
+			);
 		}
 
 		return $fields;
@@ -263,6 +277,7 @@ class Model extends \lithium\data\Model {
 			return static::_mapSchemaFields($model, $mapping);
 		}
 		$schema = $model::schema();
+		$key = $model::meta('key');
 		$fields = array();
 		foreach ($fieldset as $field => $settings) {
 			if (is_int($field)) {
@@ -270,6 +285,9 @@ class Model extends \lithium\data\Model {
 				$settings = array();
 			}
 			$fields[$field] = array();
+			if ($field == $key && isset($mapping['__key'])) {
+				$fields[$field]+= $mapping['__key'];
+			}
 			$type = isset($schema[$field]) ? $schema[$field]['type'] : null;
 			if ($type && isset($mapping[$type])) {
 				$fields[$field] = $mapping[$type];
@@ -284,9 +302,13 @@ class Model extends \lithium\data\Model {
 			$mapping = static::getFieldMapping($mapping);
 		}
 		$schema = $model::schema();
+		$key = $model::meta('key');
 		$fields = array();
 		foreach ($schema as $field => $settings) {
 			$fields[$field] = array();
+			if ($field == $key && isset($mapping['__key'])) {
+				$fields[$field]+= $mapping['__key'];
+			}
 			if (isset($mapping[$settings['type']])) {
 				$fields[$field]+= $mapping[$settings['type']];
 			}
