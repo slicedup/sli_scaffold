@@ -10,7 +10,6 @@ namespace slicedup_scaffold\core;
 
 use slicedup_scaffold\extensions\data\Model;
 use lithium\core\Libraries;
-use lithium\net\http\Media;
 use lithium\util\Inflector;
 use BadMethodCallException;
 
@@ -191,7 +190,6 @@ class Scaffold extends \lithium\core\StaticObject {
 
 		$controller->scaffold = compact('name') + $config;
 		static::set($name, $config);
-		static::_setMediaPaths($controller);
 	}
 
 	/**
@@ -295,43 +293,6 @@ class Scaffold extends \lithium\core\StaticObject {
 			'controller' => static::controller($name, false) ?: null,
 			'model' => static::model($name, false) ?: null
 		);
-	}
-
-	/**
-	 * Set Media paths to allow for default scaffold templates to be used
-	 * and to adjust the layout path to default to the app.
-	 *
-	 * @todo do we need to set paths for scaffolds in other libs?
-	 * @todo do we need to set templates to app default also?
-	 *
-	 * @param \lithium\action\Controller $controller
-	 */
-	protected static function _setMediaPaths(\lithium\action\Controller &$controller){
-		$scaffold = Libraries::get('slicedup_scaffold');
-		$name = $controller->scaffold['name'];
-		$paths = array(
-			'template' => array(
-				"{:library}/views/{$name}/{:template}.{:type}.php",
-				'{:library}/views/{:controller}/{:template}.{:type}.php',
-				'{:library}/views/scaffold/{:template}.{:type}.php',
-				$scaffold['path'] . '/views/scaffold/{:template}.{:type}.php'
-			),
-			'layout' => array(
-				'{:library}/views/layouts/{:layout}.{:type}.php',
-				LITHIUM_APP_PATH . '/views/layouts/{:layout}.{:type}.php'
-			)
-		);
-		//if (!empty($request->params['library'])) {
-		//	if ($library = Libraries::get($request->params['library'])) {}
-		//}
-		$type = $controller->request->type();
-		if ($type == 'form') {
-			$type = 'html';
-		}
-		Media::type($type, null, array(
-			'view' => '\lithium\template\View',
-			'paths' => $paths
-		));
 	}
 
 	/**

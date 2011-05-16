@@ -15,6 +15,11 @@ class ScaffoldController extends \lithium\action\Controller {
 
 	public $scaffold;
 
+	protected function _init() {
+        $this->_render['negotiate'] = true;
+        parent::_init();
+    }
+
 	public function index() {
 		$vars = $this->_scaffoldVars();
 		extract($vars);
