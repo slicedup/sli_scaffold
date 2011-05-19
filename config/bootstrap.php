@@ -58,7 +58,6 @@ $ajax['options']  = Set::merge($ajax['options'], array(
 		'template' => array(
 			'{:library}/views/{:controller}/{:template}.ajax.php',
 			'{:library}/views/scaffold/{:template}.ajax.php',
-			$scaffold['path'] . '/views/scaffold/{:template}.ajax.php',
 			'{:library}/views/{:controller}/{:template}.html.php',
 			'{:library}/views/scaffold/{:template}.html.php',
 			$scaffold['path'] . '/views/scaffold/{:template}.html.php'
