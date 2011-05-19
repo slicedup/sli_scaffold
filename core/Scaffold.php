@@ -265,7 +265,7 @@ class Scaffold extends \lithium\core\StaticObject {
 				$model = $config['model'];
 			}
 		} else {
-			$model = Libraries::locate('models', Inflector::classify($name));
+			$model = Libraries::locate('models', Inflector::pluralize(Inflector::classify($name)));
 		}
 		if (!$model && $default) {
 			$model = static::$_classes['model'];
@@ -276,7 +276,7 @@ class Scaffold extends \lithium\core\StaticObject {
 			$model::meta(array(
 				'connection' => $connection,
 				'source' => Inflector::tableize($name),
-				'name' => Inflector::classify($name)
+				'name' => Inflector::pluralize(Inflector::classify($name))
 			));
 		}
 		return $model;
