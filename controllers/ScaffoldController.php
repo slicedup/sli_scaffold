@@ -25,7 +25,9 @@ class ScaffoldController extends \lithium\action\Controller {
 		extract($vars);
 		$fields = Scaffold::getSummaryFields($model);
 		$recordSet = $model::all();
-		$this->set(compact('recordSet', 'fields'));
+		$data = compact('recordSet', 'fields');
+		$this->set($data);
+		return $vars + $data;
 	}
 
 	public function view() {
@@ -47,7 +49,9 @@ class ScaffoldController extends \lithium\action\Controller {
 		if (($this->request->data) && $record->save($this->request->data)) {
 			$this->redirect(array('action' => 'index'));
 		}
-		return compact('record', 'fields');
+		$data = compact('record', 'fields');
+		$this->set($data);
+		return $vars + $data;
 	}
 
 	public function edit() {
@@ -61,7 +65,9 @@ class ScaffoldController extends \lithium\action\Controller {
 		if (($this->request->data) && $record->save($this->request->data)) {
 			$this->redirect(array('action' => 'index'));
 		}
-		return compact('record', 'fields');
+		$data = compact('record', 'fields');
+		$this->set($data);
+		return $vars + $data;
 	}
 
 	public function delete() {
