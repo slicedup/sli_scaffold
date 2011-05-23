@@ -10,6 +10,8 @@ namespace slicedup_scaffold\core;
 
 use slicedup_scaffold\extensions\data\Model;
 use lithium\core\Libraries;
+use lithium\net\http\Media;
+use lithium\util\Set;
 use lithium\util\Inflector;
 use BadMethodCallException;
 
@@ -189,7 +191,51 @@ class Scaffold extends \lithium\core\StaticObject {
 		}
 
 		$controller->scaffold = compact('name') + $config;
+		static::setMediaPaths($name);
 		static::set($name, $config);
+	}
+	
+	public static function setMediaPaths() {
+		$scaffold = Libraries::get('slicedup_scaffold');
+		$htmlOptions = array(
+			'view' => '\lithium\template\View',
+			'paths' => array(
+				'template' => array(
+					'{:library}/views/{:controller}/{:template}.html.php',
+					'{:library}/views/scaffold/{:template}.html.php',
+					$scaffold['path'] . '/views/scaffold/{:template}.html.php'
+				),
+				'layout' => array(
+					'{:library}/views/layouts/{:layout}.html.php',
+					LITHIUM_APP_PATH . '/views/layouts/{:layout}.html.php'
+				)
+			)
+		);
+		$html = Media::type('html');
+		Media::type('html', $html['content'], Set::merge($html['options'], $htmlOptions));
+		
+		$ajax = Media::type('ajax') ?: array_fill_keys(array('options','content'), array());
+		$ajax['options']  = Set::merge($ajax['options'], array(
+			'view' => '\lithium\template\View',
+			'paths' => array(
+				'template' => array(
+					'{:library}/views/{:controller}/{:template}.ajax.php',
+					'{:library}/views/scaffold/{:template}.ajax.php',
+					'{:library}/views/{:controller}/{:template}.html.php',
+					'{:library}/views/scaffold/{:template}.html.php',
+					$scaffold['path'] . '/views/scaffold/{:template}.html.php'
+				),
+				'layout' => array(
+					'{:library}/views/layouts/{:layout}.ajax.php',
+					LITHIUM_APP_PATH . '/views/layouts/{:layout}.ajax.php',
+					'{:library}/views/layouts/{:layout}.html.php',
+					LITHIUM_APP_PATH . '/views/layouts/{:layout}.html.php'
+				)
+			),
+			'conditions' => array('ajax' => true)
+		));
+		$ajax['content'] = array('text/html', 'application/xhtml+xml', 'application/javascript', 'text/javascript');
+		Media::type('ajax', $ajax['content'], $ajax['options']);
 	}
 
 	/**
