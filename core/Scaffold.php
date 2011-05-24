@@ -11,6 +11,7 @@ namespace slicedup_scaffold\core;
 use slicedup_scaffold\extensions\data\Model;
 use lithium\core\Libraries;
 use lithium\net\http\Media;
+use lithium\action\Dispatcher;
 use lithium\util\Set;
 use lithium\util\Inflector;
 use BadMethodCallException;
@@ -185,13 +186,16 @@ class Scaffold extends \lithium\core\StaticObject {
 		$config['controller'] = '\\' . get_class($controller);
 
 		$action = $params['params']['action'];
+
 		if (!method_exists($controller, $action) && static::handledAction($name, $action)) {
 			$options = array('request' => $params['request']) + $params['options'];
 			$controller = static::_instance('controller', $options);
+			$params['params']['controller'] = static::$_classes['controller'];
+			$controller = Dispatcher::invokeMethod('_callable', array_values($params));
 		}
-
+		
 		$controller->scaffold = compact('name') + $config;
-		static::setMediaPaths($name);
+		static::setMediaPaths();
 		static::set($name, $config);
 	}
 	
@@ -209,7 +213,8 @@ class Scaffold extends \lithium\core\StaticObject {
 					'{:library}/views/layouts/{:layout}.html.php',
 					LITHIUM_APP_PATH . '/views/layouts/{:layout}.html.php'
 				)
-			)
+			),
+			'conditions' => array('ajax' => false)
 		);
 		$html = Media::type('html');
 		Media::type('html', $html['content'], Set::merge($html['options'], $htmlOptions));
@@ -234,7 +239,11 @@ class Scaffold extends \lithium\core\StaticObject {
 			),
 			'conditions' => array('ajax' => true)
 		));
-		$ajax['content'] = array('text/html', 'application/xhtml+xml', 'application/javascript', 'text/javascript');
+		$ajax['content'] = array(
+			'text/html', 'application/xhtml+xml',//html 
+			'application/x-www-form-urlencoded',//form
+			'application/javascript', 'text/javascript'//js
+		);
 		Media::type('ajax', $ajax['content'], $ajax['options']);
 	}
 
