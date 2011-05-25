@@ -185,20 +185,20 @@ class Model extends \lithium\data\Model {
 			"get" . ucfirst($setName),
 			"getScaffoldFields"
 		);
-		$class = $model::invokeMethod('_object');
+		
 		$fields = array();
 		switch (true) {
 			case method_exists($model, $getters[0]):
 				$fields = $model::$getters[0]();
 				break;
-			case isset($class->{$setName}):
-				$fields = $class->{$setName};
+			case isset($model::$$setName):
+				$fields = $model::$$setName;
 				break;
 			case $getters[0] != $getters[1] && method_exists($model, $getters[1]):
 				$fields = $model::$getters[1]();
 				break;
-			case isset($class->scaffoldFields):
-				$fields = $class->scaffoldFields;
+			case isset($model::$scaffoldFields):
+				$fields = $model::$scaffoldFields;
 				break;
 		}
 		
@@ -247,20 +247,20 @@ class Model extends \lithium\data\Model {
 			"get" . ucfirst($setName),
 			"getScaffoldFormFields"
 		);
-		$class = $model::invokeMethod('_object');
+		
 		$fields = array();
 		switch (true) {
 			case method_exists($model, $getters[0]):
 				$fields = $model::$getters[0]();
 				break;
-			case isset($class->{$setName}):
-				$fields = $class->{$setName};
+			case isset($model::$$setName):
+				$fields = $model::$$setName;
 				break;
 			case $getters[0] != $getters[1] && method_exists($model, $getters[1]):
 				$fields = $model::$getters[1]();
 				break;
-			case isset($class->scaffoldFormFields):
-				$fields = $class->scaffoldFormFields;
+			case isset($model::$scaffoldFormFields):
+				$fields = $model::$scaffoldFormFields;
 				break;
 		}
 		
