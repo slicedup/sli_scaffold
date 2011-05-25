@@ -181,30 +181,50 @@ class Model extends \lithium\data\Model {
 			$fieldset = 'scaffold';
 		}
 		$setName = Inflector::camelize($fieldset, false) . 'Fields';
-		$_model = $model::invokeMethod('_object');
-		if (isset($_model->{$setName})) {
-			$_fields = $_model->{$setName};
-		} elseif (isset($_model->scaffoldFields)) {
-			$_fields = $_model->scaffoldFields;
+		$getters = array(
+			"get" . ucfirst($setName),
+			"getScaffoldFields"
+		);
+		$class = $model::invokeMethod('_object');
+		$fields = array();
+		switch (true) {
+			case method_exists($model, $getters[0]):
+				$fields = $model::$getters[0]();
+				break;
+			case isset($class->{$setName}):
+				$fields = $class->{$setName};
+				break;
+			case $getters[0] != $getters[1] && method_exists($model, $getters[1]):
+				$fields = $model::$getters[1]();
+				break;
+			case isset($class->scaffoldFields):
+				$fields = $class->scaffoldFields;
+				break;
 		}
-
-		if (isset($_fields)) {
-			$fields = array();
-			foreach ($_fields as $field => $name) {
-				if (is_int($field)) {
-					$field = $name;
-					$name = Inflector::humanize($name);
+		
+		$filter = function($self, $params) {
+			extract($params);
+			if (empty($fields)) {
+				$schema = $model::schema();
+				$keys = array_keys($schema);
+				$fieldsNames = array_map('\lithium\util\Inflector::humanize', $keys);
+				$fields = array_combine($keys, $fieldsNames);
+			} else {
+				$_fields = $fields;
+				$fields = array();
+				foreach ($_fields as $field => $name) {
+					if (is_int($field)) {
+						$field = $name;
+						$name = Inflector::humanize($name);
+					}
+					$fields[$field] = $name;
 				}
-				$fields[$field] = $name;
 			}
-		} else {
-			$schema = $model::schema();
-			$keys = array_keys($schema);
-			$fieldsNames = array_map('\lithium\util\Inflector::humanize', $keys);
-			$fields = array_combine($keys, $fieldsNames);
-		}
-
-		return $fields;
+			return $fields;
+		};
+		
+		$params = compact('fields', 'fieldset', 'model');
+		return static::_filter(__FUNCTION__, $params, $filter);
 	}
 
 	/**
@@ -218,36 +238,62 @@ class Model extends \lithium\data\Model {
 		if (!$fieldset || strtolower($fieldset) == 'form') {
 			$fieldset = 'scaffold';
 		}
-		$setName = Inflector::camelize($fieldset, false) . 'FormFields';
-		$_model = $model::invokeMethod('_object');
-		if (isset($_model->{$setName})) {
-			$fields = $_model->{$setName};
-		} elseif (isset($_model->scaffoldFormFields)) {
-			$fields = $_model->scaffoldFormFields;
+		$setName = Inflector::camelize($fieldset, false);
+		if (substr($setName, -4) != 'Form') {
+			$setName .= 'Form';
 		}
-
-		if (isset($fields)) {
-			foreach ($fields as $key => &$fieldset) {
-				if (!isset($fieldset['fields'])) {
-					$fieldset = array(
-						'fields' => $fieldset
-					);
-				}
-				$fieldset['fields'] = static::_mapFormFields($model, $fieldset['fields'], $mapping);
-				if (!isset($fieldset['legend'])) {
-					$fieldset['legend'] = !is_int($key) ? $key : null;
-				}
-			}
-		} else {
-			$fields = array(
-				array(
+		$setName .= 'Fields';
+		$getters = array(
+			"get" . ucfirst($setName),
+			"getScaffoldFormFields"
+		);
+		$class = $model::invokeMethod('_object');
+		$fields = array();
+		switch (true) {
+			case method_exists($model, $getters[0]):
+				$fields = $model::$getters[0]();
+				break;
+			case isset($class->{$setName}):
+				$fields = $class->{$setName};
+				break;
+			case $getters[0] != $getters[1] && method_exists($model, $getters[1]):
+				$fields = $model::$getters[1]();
+				break;
+			case isset($class->scaffoldFormFields):
+				$fields = $class->scaffoldFormFields;
+				break;
+		}
+		
+		$filter = function($self, $params) {
+			extract($params);
+			if (empty($fields)) {
+				$fields[] = array(
 					'legend' => null,
-					'fields' => static::_mapSchemaFields($model, $mapping)
-				)
-			);
-		}
-
-		return $fields;
+					'fields' => $self::invokeMethod('_mapSchemaFields', array($model, $mapping))
+				);
+			} else {
+				$first = reset($fields);
+				if (!is_array($first) || !isset($first['fields'])) {
+					$fields = array(compact('fields'));
+				}
+				foreach ($fields as $key => &$_fieldset) {
+					if (!isset($_fieldset['fields'])) {
+						$_fieldset = array(
+							'fields' => $_fieldset
+						);
+					}
+					$map = array($model, $_fieldset['fields'], $mapping);
+					$_fieldset['fields'] = $self::invokeMethod('_mapFormFields', $map);
+					if (!isset($_fieldset['legend'])) {
+						$_fieldset['legend'] = !is_int($key) ? $key : null;
+					}
+				}	
+			}
+			return $fields;
+		};
+		
+		$params = compact('fields', 'fieldset', 'mapping', 'model');
+		return static::_filter(__FUNCTION__, $params, $filter);
 	}
 
 	public static function getFieldMapping($mapping) {
