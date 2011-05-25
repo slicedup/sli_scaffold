@@ -45,8 +45,8 @@ class ScaffoldController extends \lithium\action\Controller {
 		$vars = $this->_scaffoldVars();
 		extract($vars);
 		$fields = Scaffold::getAddFormFields($model);
-		$record = $model::create();
-		if (($this->request->data) && $record->save($this->request->data)) {
+		$record = $model::create($this->request->data);
+		if (($this->request->data) && $record->save()) {
 			$this->redirect(array('action' => 'index'));
 		}
 		$data = compact('record', 'fields');
