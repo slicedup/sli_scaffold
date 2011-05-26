@@ -39,7 +39,8 @@ class Scaffold extends \lithium\core\StaticObject {
 		'view',
 		'add',
 		'edit',
-		'delete'
+		'delete',
+		'display'
 	);
 
 	/**

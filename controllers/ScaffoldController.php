@@ -130,7 +130,20 @@ class ScaffoldController extends \lithium\action\Controller {
 		return $this->_filter(__METHOD__, $params, $filter);
 	}
 
-	public function display() {}
+	public function display() {
+		$vars = $this->_scaffoldVars();
+		$path = func_get_args() ?: array('display');
+		$params = $vars + compact('path');
+
+		$filter = function($self, $params){
+			if (!isset($params['template'])) {
+				$params['template'] = join('/', (array) $params['path']);
+			}
+			return $self->render($params);
+		};
+
+		return $this->_filter(__METHOD__, $params, $filter);
+	}
 
 	protected function _scaffoldVars () {
 		$name = Inflector::humanize($this->scaffold['name']);
