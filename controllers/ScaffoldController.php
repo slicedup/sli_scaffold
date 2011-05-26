@@ -36,9 +36,11 @@ class ScaffoldController extends \lithium\action\Controller {
 		$fields = Scaffold::getDetailFields($model);
 		$record = $model::first($this->request->id);
 		if (!$record) {
-			$this->redirect(array('action' => 'index'));
+			return $this->redirect(array('action' => 'index'));
 		}
-		$this->set(compact('record', 'fields'));
+		$data = compact('record', 'fields');
+		$this->set($data);
+		return $vars + $data;
 	}
 
 	public function add() {
@@ -76,7 +78,7 @@ class ScaffoldController extends \lithium\action\Controller {
 		if ($record) {
 			$record->delete();
 		}
-		$this->redirect(array('action' => 'index'));
+		return $this->redirect(array('action' => 'index'));
 	}
 
 	public function display() {}
@@ -92,7 +94,6 @@ class ScaffoldController extends \lithium\action\Controller {
 		$this->set($vars);
 		return $vars;
 	}
-
 }
 
 ?>
