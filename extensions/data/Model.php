@@ -330,15 +330,14 @@ class Model extends \lithium\data\Model {
 				$field = current((array) $settings);
 				$settings = array();
 			}
-			$fields[$field] = array();
+			$fields[$field] = $settings;
 			if ($field == $key && isset($mapping['__key'])) {
 				$fields[$field]+= $mapping['__key'];
 			}
 			$type = isset($schema[$field]) ? $schema[$field]['type'] : null;
 			if ($type && isset($mapping[$type])) {
-				$fields[$field] = $mapping[$type];
+				$fields[$field]+= $mapping[$type];
 			}
-			$fields[$field]+= $settings;
 		}
 		return $fields;
 	}
