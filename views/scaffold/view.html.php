@@ -19,8 +19,14 @@ $this->title($t($plural));
 		</dl>
 	</div>
 	<ul class="actions">
+		<?php if(in_array('edit', $actions)):?>
 		<li><?php echo $this->html->link($t('Edit'), array('action' => 'edit', 'args' => $record->key()));?></li>
+		<?php endif;?>
+		<?php if(in_array('delete', $actions)):?>
 		<li><?php echo $this->html->link($t('Delete'), array('action' => 'delete', 'args' => $record->key()));?></li>
+		<?php endif;?>
+		<?php if(in_array('index', $actions)):?>
 		<li><?php echo $this->html->link($t($plural), array('action' => 'index'));?></li>
+		<?php endif;?>
 	</ul>
 </div>

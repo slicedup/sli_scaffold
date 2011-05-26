@@ -22,16 +22,23 @@ $this->title($t($plural));
 				<?php foreach ($fields as $field => $name):?>
 				<td><?php echo $h($record->{$field});?></td>
 				<?php endforeach;?>
-				<td>
-					<?php echo $this->html->link($t('View'), array('action' => 'view', 'args' => $record->key()));?> |
-					<?php echo $this->html->link($t('Edit'), array('action' => 'edit', 'args' => $record->key()));?> |
-					<?php echo $this->html->link($t('Delete'), array('action' => 'delete', 'args' => $record->key()));?>
+				<td class="actions">
+					<?php 
+						$_actions = array('view', 'edit', 'delete');
+						foreach ($_actions as $action):
+							if(in_array($action, $actions)):
+								echo $this->html->link($t(ucfirst($action)), array('action' => $action, 'args' => $record->key()));
+							endif;
+						endforeach;
+					?>
 				</td>
 			</tr>
 		<?php endforeach;?>
 		</table>
 	</div>
 	<ul class="actions">
+		<?php if(in_array('add', $actions)):?>
 		<li><?php echo $this->html->link($t('{:action} {:entity}', array('action' => $t('Add'), 'entity' => $t($singular))), array('action' => 'add'));?></li>
+		<?php endif;?>
 	</ul>
 </div>
