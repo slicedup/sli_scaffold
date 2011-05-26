@@ -22,63 +22,112 @@ class ScaffoldController extends \lithium\action\Controller {
 
 	public function index() {
 		$vars = $this->_scaffoldVars();
-		extract($vars);
-		$fields = Scaffold::getSummaryFields($model);
-		$recordSet = $model::all();
-		$data = compact('recordSet', 'fields');
-		$this->set($data);
-		return $vars + $data;
+		$fields = Scaffold::getSummaryFields($vars['model']);
+		$params = $vars + compact('fields');
+		
+		$filter = function($self, $params){
+			$model = $params['model'];
+			if (empty($params['recordSet'])) {
+				$params['recordSet'] = $model::all();
+			}
+			
+			$self->set($params);
+			return $params;
+		};
+		
+		return $this->_filter(__METHOD__, $params, $filter);
 	}
 
 	public function view() {
 		$vars = $this->_scaffoldVars();
-		extract($vars);
-		$fields = Scaffold::getDetailFields($model);
-		$record = $model::first($this->request->id);
-		if (!$record) {
-			return $this->redirect(array('action' => 'index'));
-		}
-		$data = compact('record', 'fields');
-		$this->set($data);
-		return $vars + $data;
+		$fields = Scaffold::getDetailFields($vars['model']);
+		$params = $vars + compact('fields');
+		
+		$filter = function($self, $params){
+			$model = $params['model'];
+			if (empty($params['record'])) {
+				$params['record'] = $model::first($self->request->id);
+			}
+			$record = $params['record'];
+			
+			if (!$record) {
+				return $self->redirect(array('action' => 'index'));
+			}
+			
+			$self->set($params);
+			return $params;
+		};
+		
+		return $this->_filter(__METHOD__, $params, $filter);
+		
 	}
 
 	public function add() {
 		$vars = $this->_scaffoldVars();
-		extract($vars);
-		$fields = Scaffold::getAddFormFields($model);
-		$record = $model::create($this->request->data);
-		if (($this->request->data) && $record->save()) {
-			return $this->redirect(array('action' => 'index'));
-		}
-		$data = compact('record', 'fields');
-		$this->set($data);
-		return $vars + $data;
+		$fields = Scaffold::getAddFormFields($vars['model']);
+		$params = $vars + compact('fields');
+		
+		$filter = function($self, $params){
+			$model = $params['model'];
+			if (empty($params['record'])) {
+				$params['record'] = $model::create($self->request->data);
+			}
+			$record = $params['record'];
+			
+			if (($self->request->data) && $record->save()) {
+				return $self->redirect(array('action' => 'index'));
+			}
+			
+			$self->set($params);
+			return $params;
+		};
+		
+		return $this->_filter(__METHOD__, $params, $filter);
 	}
 
 	public function edit() {
 		$vars = $this->_scaffoldVars();
-		extract($vars);
-		$fields = Scaffold::getEditFormFields($model);
-		$record = $model::find($this->request->id);
-		if (!$record) {
-			return $this->redirect(array('action' => 'index'));
-		}
-		if (($this->request->data) && $record->save($this->request->data)) {
-			return $this->redirect(array('action' => 'index'));
-		}
-		$data = compact('record', 'fields');
-		$this->set($data);
-		return $vars + $data;
+		$fields = Scaffold::getEditFormFields($vars['model']);
+		$params = $vars + compact('fields');
+		
+		$filter = function($self, $params){
+			$model = $params['model'];
+			if (empty($params['record'])) {
+				$params['record'] = $model::find($self->request->id);
+			}
+			$record = $params['record'];
+			
+			if (!$record) {
+				return $self->redirect(array('action' => 'index'));
+			}
+			
+			if (($self->request->data) && $record->save($self->request->data)) {
+				return $self->redirect(array('action' => 'index'));
+			}
+			
+			$self->set($params);
+			return $params;
+		};
+		
+		return $this->_filter(__METHOD__, $params, $filter);
 	}
 
 	public function delete() {
-		$model = Scaffold::model($this->scaffold['name']);
-		$record = $model::find($this->request->id);
-		if ($record) {
-			$record->delete();
-		}
-		return $this->redirect(array('action' => 'index'));
+		$params = $this->_scaffoldVars();
+		
+		$filter = function($self, $params){
+			$model = $params['model'];
+			if (empty($params['record'])) {
+				$params['record'] = $model::find($self->request->id);
+			}
+			$record = $params['record'];
+			if ($record) {
+				$record->delete();
+			}
+			return $self->redirect(array('action' => 'index'));
+		};
+		
+		return $this->_filter(__METHOD__, $params, $filter);
 	}
 
 	public function display() {}
@@ -89,7 +138,7 @@ class ScaffoldController extends \lithium\action\Controller {
 			'model' => Scaffold::model($this->scaffold['name']),
 			'plural' => Inflector::pluralize($name),
 			'singular' => Inflector::singularize($name),
-			'actions' => Scaffold::handledAction($name . 'fd')
+			'actions' => Scaffold::handledAction($name)
 		);
 		$this->set($vars);
 		return $vars;
