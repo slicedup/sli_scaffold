@@ -64,7 +64,7 @@ class ScaffoldController extends \lithium\action\Controller {
 
 	public function add() {
 		$vars = $this->_scaffoldVars();
-		$fields = Scaffold::getAddFormFields($vars['model']);
+		$fields = Scaffold::getCreateFormFields($vars['model']);
 		$params = $vars + compact('fields');
 		
 		$filter = function($self, $params){
@@ -87,7 +87,7 @@ class ScaffoldController extends \lithium\action\Controller {
 
 	public function edit() {
 		$vars = $this->_scaffoldVars();
-		$fields = Scaffold::getEditFormFields($vars['model']);
+		$fields = Scaffold::getUpdateFormFields($vars['model']);
 		$params = $vars + compact('fields');
 		
 		$filter = function($self, $params){
