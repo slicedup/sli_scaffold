@@ -201,6 +201,11 @@ class Scaffold extends \lithium\core\StaticObject {
 	}
 	
 	public static function setMediaPaths() {
+		static $run;
+		if (isset($run)) {
+			return;
+		}
+		$run = true;
 		$scaffold = Libraries::get('slicedup_scaffold');
 		$htmlOptions = array(
 			'view' => '\lithium\template\View',
@@ -213,6 +218,9 @@ class Scaffold extends \lithium\core\StaticObject {
 				'layout' => array(
 					'{:library}/views/layouts/{:layout}.html.php',
 					LITHIUM_APP_PATH . '/views/layouts/{:layout}.html.php'
+				),
+				'element' => array(
+					'{:library}/views/elements/{:template}.{:type}.php',
 				)
 			),
 			'conditions' => array('ajax' => false)
@@ -236,6 +244,10 @@ class Scaffold extends \lithium\core\StaticObject {
 					LITHIUM_APP_PATH . '/views/layouts/{:layout}.ajax.php',
 					'{:library}/views/layouts/{:layout}.html.php',
 					LITHIUM_APP_PATH . '/views/layouts/{:layout}.html.php'
+				),
+				'element' => array(
+					'{:library}/views/elements/{:template}.{:type}.php',
+					'{:library}/views/elements/{:template}.html.php',
 				)
 			),
 			'conditions' => array('ajax' => true)
