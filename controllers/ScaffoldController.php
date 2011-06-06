@@ -70,11 +70,11 @@ class ScaffoldController extends \lithium\action\Controller {
 		$filter = function($self, $params){
 			$model = $params['model'];
 			if (empty($params['record'])) {
-				$params['record'] = $model::create($self->request->data);
+				$params['record'] = $model::create();
 			}
 			$record = $params['record'];
 			
-			if (($self->request->data) && $record->save()) {
+			if (($self->request->data) && $record->save($self->request->data)) {
 				return $self->redirect(array('action' => 'index'));
 			}
 			
