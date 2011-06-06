@@ -190,7 +190,6 @@ class Scaffold extends \lithium\core\StaticObject {
 
 		if (!method_exists($controller, $action) && static::handledAction($name, $action)) {
 			$options = array('request' => $params['request']) + $params['options'];
-			$controller = static::_instance('controller', $options);
 			$params['params']['controller'] = static::$_classes['controller'];
 			$controller = Dispatcher::invokeMethod('_callable', array_values($params));
 		}
