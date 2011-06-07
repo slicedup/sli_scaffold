@@ -6,6 +6,7 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
+use lithium\core\Libraries;
 use lithium\action\Dispatcher;
 use slicedup_scaffold\core\Scaffold;
 
@@ -13,17 +14,21 @@ use slicedup_scaffold\core\Scaffold;
  * Dispatch filter to cathc scaffold requests
  */
 Dispatcher::applyFilter('_callable', function($self, $params, $chain) {
-	try {
-		$controller = $chain->next($self, $params, $chain);
-	} catch (lithium\action\DispatchException $e) {
-		if(!$controller = Scaffold::callable($params)) {
-			throw $e;
+	$scaffoldName = Scaffold::name($params['params']);
+
+	$controller = $params['params']['controller'];
+	if(!Libraries::locate('controllers', $controller)) {
+		if($controller = Scaffold::callable($params)) {
+			$params['params']['controller'] = $controller;
 		}
 	}
+
+	$controller = $chain->next($self, $params, $chain);
+
 	if (property_exists($controller, 'scaffold')) {
-		$name = $params['params']['controller'];
-		Scaffold::prepareController($name, $controller, $params);
+		Scaffold::prepare($scaffoldName, $controller, $params);
 	}
+
 	return $controller;
 });
 ?>

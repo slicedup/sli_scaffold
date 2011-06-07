@@ -8,6 +8,8 @@
 
 namespace slicedup_scaffold\tests\cases\core;
 
+use lithium\test;
+
 use slicedup_scaffold\core\Scaffold;
 use slicedup_scaffold\tests\mocks\data\MockPost;
 use lithium\action\Request;
@@ -105,7 +107,7 @@ class ScaffoldTest extends \lithium\test\Unit {
 
 	public function testScaffoldSetGet() {
 		$config = array(
-			'controller' => '\slicedup_scaffold\tests\mocks\controllers\MockController'
+			'controller' => 'slicedup_scaffold\tests\mocks\controllers\MockController'
 		);
 		Scaffold::set('posts', $config);
 		$expected = $config + array('model' => null);
@@ -118,25 +120,25 @@ class ScaffoldTest extends \lithium\test\Unit {
 		Scaffold::set('posts');
 		$result = Scaffold::get('posts');
 		$this->assertNull($result['controller']);
-		$expected = '\slicedup_scaffold\controllers\ScaffoldController';
+		$expected = 'slicedup_scaffold\controllers\ScaffoldController';
 		$this->assertIdentical($expected, Scaffold::controller('posts'));
 
 		$config = array(
-			'controller' => '\slicedup_scaffold\tests\mocks\controllers\NonExistentController'
+			'controller' => 'slicedup_scaffold\tests\mocks\controllers\NonExistentController'
 		);
 		Scaffold::set('posts', $config);
-		$expected = '\slicedup_scaffold\controllers\ScaffoldController';
+		$expected = 'slicedup_scaffold\controllers\ScaffoldController';
 		$this->assertIdentical($expected, Scaffold::controller('posts'));
 
 		$config = array(
 			'controller' => 'NonExistentController'
 		);
 		Scaffold::set('posts', $config);
-		$expected = '\slicedup_scaffold\controllers\ScaffoldController';
+		$expected = 'slicedup_scaffold\controllers\ScaffoldController';
 		$this->assertIdentical($expected, Scaffold::controller('posts'));
 
 		$config = array(
-			'controller' => '\slicedup_scaffold\tests\mocks\controllers\MockController'
+			'controller' => 'slicedup_scaffold\tests\mocks\controllers\MockController'
 		);
 		Scaffold::set('posts', $config);
 		$expected = $config['controller'];
@@ -146,7 +148,7 @@ class ScaffoldTest extends \lithium\test\Unit {
 			'controller' => 'MockController'
 		);
 		Scaffold::set('posts', $config);
-		$expected = '\slicedup_scaffold\tests\mocks\controllers\MockController';
+		$expected = 'slicedup_scaffold\tests\mocks\controllers\MockController';
 		$this->assertIdentical($expected, Scaffold::controller('posts'));
 	}
 
@@ -154,25 +156,25 @@ class ScaffoldTest extends \lithium\test\Unit {
 		Scaffold::set('posts');
 		$result = Scaffold::get('posts');
 		$this->assertNull($result['model']);
-		$expected = '\slicedup_scaffold\models\Scaffolds';
+		$expected = 'slicedup_scaffold\models\Scaffolds';
 		$this->assertIdentical($expected, Scaffold::model('posts'));
 
 		$config = array(
-			'model' => '\slicedup_scaffold\tests\mocks\models\NonExistentModel'
+			'model' => 'slicedup_scaffold\tests\mocks\models\NonExistentModel'
 		);
 		Scaffold::set('posts', $config);
-		$expected = '\slicedup_scaffold\models\Scaffolds';
+		$expected = 'slicedup_scaffold\models\Scaffolds';
 		$this->assertIdentical($expected, Scaffold::model('posts'));
 
 		$config = array(
 			'model' => 'NonExistentModel'
 		);
 		Scaffold::set('posts', $config);
-		$expected = '\slicedup_scaffold\models\Scaffolds';
+		$expected = 'slicedup_scaffold\models\Scaffolds';
 		$this->assertIdentical($expected, Scaffold::model('posts'));
 
 		$config = array(
-			'model' => '\slicedup_scaffold\tests\mocks\data\MockPost'
+			'model' => 'slicedup_scaffold\tests\mocks\data\MockPost'
 		);
 		Scaffold::set('posts', $config);
 		$expected = $config['model'];
@@ -182,7 +184,7 @@ class ScaffoldTest extends \lithium\test\Unit {
 			'model' => 'MockPost'
 		);
 		Scaffold::set('posts', $config);
-		$expected = '\slicedup_scaffold\tests\mocks\data\MockPost';
+		$expected = 'slicedup_scaffold\tests\mocks\data\MockPost';
 		$this->assertIdentical($expected, Scaffold::model('posts'));
 		$meta = $expected::meta();
 		$this->assertEqual('MockPost', $meta['name']);
@@ -191,8 +193,9 @@ class ScaffoldTest extends \lithium\test\Unit {
 
 	public function testCallable() {
 		$params = $this->_request();
+		$expected = 'slicedup_scaffold\controllers\ScaffoldController';
 		$result = Scaffold::callable($params);
-		$this->assertTrue($result instanceof \slicedup_scaffold\controllers\ScaffoldController);
+		$this->assertEqual($expected, $result);
 
 		Scaffold::config(false);
 		$params = $this->_request();
@@ -202,56 +205,57 @@ class ScaffoldTest extends \lithium\test\Unit {
 		Scaffold::set('posts');
 		$params = $this->_request();
 		$result = Scaffold::callable($params);
-		$this->assertTrue($result instanceof \slicedup_scaffold\controllers\ScaffoldController);
+		$this->assertEqual($expected, $result);
 
 		$config = array(
-			'controller' => '\slicedup_scaffold\tests\mocks\controllers\NonExistentController'
+			'controller' => 'slicedup_scaffold\tests\mocks\controllers\NonExistentController'
 		);
 		Scaffold::set('posts', $config);
 		$params = $this->_request();
 		$result = Scaffold::callable($params);
-		$this->assertTrue($result instanceof \slicedup_scaffold\controllers\ScaffoldController);
+		$this->assertEqual($expected, $result);
 
+		$expected = 'slicedup_scaffold\tests\mocks\controllers\MockController';
 		$config = array(
-			'controller' => '\slicedup_scaffold\tests\mocks\controllers\MockController'
+			'controller' => $expected
 		);
 		Scaffold::set('posts', $config);
 		$params = $this->_request();
 		$result = Scaffold::callable($params);
-		$this->assertTrue($result instanceof \slicedup_scaffold\tests\mocks\controllers\MockController);
+		$this->assertEqual($expected, $result);
 	}
 
 	public function testControllerPrepare() {
 		$params = $this->_request();
-		$controller = Scaffold::callable($params);
+		$options = array('request' => $params['request']) + $params['options'];
+		$controller = Libraries::instance('controllers', Scaffold::callable($params), $options);
+
 		$this->assertNull($controller->scaffold);
-		Scaffold::prepareController('posts', $controller, $params);
+		Scaffold::prepare('posts', $controller, $params);
 		$this->assertTrue(!empty($controller->scaffold));
-		$this->assertIdentical('\slicedup_scaffold\controllers\ScaffoldController', $controller->scaffold['controller']);
+		$this->assertIdentical('slicedup_scaffold\controllers\ScaffoldController', $controller->scaffold['controller']);
 		$this->assertIdentical('posts', $controller->scaffold['name']);
 	}
 
-	public function testReassignController() {
+	public function testInvoke() {
+		$expected = 'slicedup_scaffold\tests\mocks\controllers\MockController';
 		$config = array(
-			'controller' => '\slicedup_scaffold\tests\mocks\controllers\MockController'
+			'controller' => $expected
 		);
 		Scaffold::set('posts', $config);
 		$params = $this->_request();
-		$result = Scaffold::callable($params);
-		$this->assertTrue($result instanceof \slicedup_scaffold\tests\mocks\controllers\MockController);
+		$options = array('request' => $params['request']) + $params['options'];
+		$controller = Libraries::instance('controllers', Scaffold::callable($params), $options);
+		$this->assertTrue($controller instanceOf $expected);
 
-		$config = array(
-			'controller' => '\slicedup_scaffold\tests\mocks\controllers\MockController'
-		);
-		Scaffold::set('posts', $config);
-		$params = $this->_request('/posts/view/1');
-		$result = Scaffold::callable($params);
-		$this->assertTrue($result instanceof \slicedup_scaffold\tests\mocks\controllers\MockController);
+		Scaffold::prepare('posts', $controller, $params);
+		$result = $controller($params['request'], $params['params']);
+		$this->assertTrue($result instanceOf \lithium\action\Response);
 
-		Scaffold::prepareController('posts', $result, $params);
-		$this->assertTrue($result instanceof \slicedup_scaffold\controllers\ScaffoldController);
-		$this->assertEqual($result->scaffold['controller'], '\slicedup_scaffold\tests\mocks\controllers\MockController');
-		$this->assertEqual(Scaffold::controller('posts'), '\slicedup_scaffold\tests\mocks\controllers\MockController');
+		$controller = Libraries::instance('controllers', Scaffold::callable($params), $options);
+		$this->assertTrue($controller instanceOf $expected);
+		$this->expectException('Action `index` not found.');
+		$controller($params['request'], $params['params']);
 	}
 
 	public function testModelCalls(){

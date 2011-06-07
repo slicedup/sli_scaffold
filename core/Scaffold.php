@@ -8,12 +8,12 @@
 
 namespace slicedup_scaffold\core;
 
-use slicedup_scaffold\extensions\data\Model;
 use lithium\core\Libraries;
 use lithium\net\http\Media;
-use lithium\action\Dispatcher;
 use lithium\util\Set;
 use lithium\util\Inflector;
+use slicedup_scaffold\extensions\data\Model;
+use slicedup_core\action\Controller;
 use BadMethodCallException;
 
 class Scaffold extends \lithium\core\StaticObject {
@@ -56,8 +56,8 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @var array
 	 */
 	protected static $_classes = array(
-		'controller' => '\slicedup_scaffold\controllers\ScaffoldController',
-		'model' => '\slicedup_scaffold\models\Scaffolds'
+		'controller' => 'slicedup_scaffold\controllers\ScaffoldController',
+		'model' => 'slicedup_scaffold\models\Scaffolds'
 	);
 
 	/**
@@ -148,25 +148,46 @@ class Scaffold extends \lithium\core\StaticObject {
 	}
 
 	/**
-	 * Takes params passed in Dispatcher::_callable() and loads a
-	 * ScaffoldController instance for the current request if Scaffold is
-	 * configured to accept requests for that controller
+	 * Get controller name as configured by scaffold
 	 *
-	 * @param array $params
+	 * @param array $params params passed in Dispatcher::_callable()
+	 * @return controller
 	 */
 	public static function callable($params){
-		$options = array('request' => $params['request']) + $params['options'];
-		$name = $params['params']['controller'];
-		$controller = static::controller($name, false);
-		if ($controller) {
-			$config['controller'] = $controller;
-			static::set($name, $config);
-			$action = $params['params']['action'];
-			$controller = new $config['controller']($options);
-		} elseif ($controller !== false) {
-			$controller = static::_instance('controller', $options);
+		$name = static::name($params['params']);
+		if ($controller = static::controller($name)) {
+			return $controller;
 		}
-		return $controller;
+	}
+
+	/**
+	 * Obtain default scaffold name from dispatch params
+	 *
+	 * @param $params
+	 * @return string
+	 */
+	public static function name($params) {
+		return static::_name($params['controller']);
+	}
+
+	/**
+	 * Invokes a scaffolded action for the current controller/request using the
+	 * default scaffold controller and sets it as the response of the current
+	 * controller.
+	 */
+	public static function invoke(&$controller, $params = array(), array $options = array()) {
+		if (property_exists($controller, 'scaffold')) {
+			static::setMediaPaths();
+			if (!is_array($params)) {
+				$params = array('action' => $params);
+			}
+			$params['controller'] = static::$_classes['controller'];
+			$options+= array(
+				'scaffold' => $controller->scaffold
+			);
+			$controller->response = Controller::invoke($controller->request, $params, $options);
+			return $controller->response;
+		}
 	}
 
 	/**
@@ -176,29 +197,44 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param \lithium\action\Controller $controller
 	 * @param array $params
 	 */
-	public static function prepareController($name, \lithium\action\Controller &$controller, $params){
-		if (!property_exists($controller, 'scaffold')) {
+	public static function prepare($name, &$controller, $params){
+		if (!empty($params['options']['scaffold'])) {
+			//Controllers invoked by Scaffold::invokeScaffoldAction always pass
+			//the scaffold config as an option, in those cases all the
+			//neccesary config has been done
+			$controller->scaffold = $params['options']['scaffold'];
 			return;
 		}
 
-		$name = static::_name($name);
-		$config = static::get($name);
-		$config = (array) $controller->scaffold + $config;
-		$config['controller'] = '\\' . get_class($controller);
+		if (property_exists($controller, 'scaffold')) {
+			static::setMediaPaths();
+			//merge Controller::scaffold with config
+			$name = static::_name($name);
+			$config = static::get($name);
+			$config = (array) $controller->scaffold + $config;
+			$config['controller'] = get_class($controller);
+			//update Controller::scaffold
+			$controller->scaffold = compact('name') + $config;
+			//update stored config
+			static::set($name, $config);
 
-		$action = $params['params']['action'];
-
-		if (!method_exists($controller, $action) && static::handledAction($name, $action)) {
-			$options = array('request' => $params['request']) + $params['options'];
-			$params['params']['controller'] = static::$_classes['controller'];
-			$controller = Dispatcher::invokeMethod('_callable', array_values($params));
+			//Check action for current controller, invoke scaffold controller
+			//for undeclared actions when action is envoked
+			$action = $params['params']['action'];
+			if (!method_exists($controller, $action) && static::handledAction($name, $action)) {
+				$scaffold = get_called_class();
+				$controller->applyFilter('__invoke', function($self, $params, $chain) use($scaffold){
+					$dispatchParams = $params['dispatchParams'];
+					$options = $params['options'];
+					return $scaffold::invoke($self, $dispatchParams, $options);
+				});
+			}
 		}
-		
-		$controller->scaffold = compact('name') + $config;
-		static::setMediaPaths();
-		static::set($name, $config);
 	}
-	
+
+	/**
+	 * Set media paths to allow universal scaffold template usage
+	 */
 	public static function setMediaPaths() {
 		static $run;
 		if (isset($run)) {
@@ -226,7 +262,7 @@ class Scaffold extends \lithium\core\StaticObject {
 		);
 		$html = Media::type('html');
 		Media::type('html', $html['content'], Set::merge($html['options'], $htmlOptions));
-		
+
 		$ajax = Media::type('ajax') ?: array_fill_keys(array('options','content'), array());
 		$ajax['options']  = Set::merge($ajax['options'], array(
 			'view' => '\lithium\template\View',
@@ -252,7 +288,7 @@ class Scaffold extends \lithium\core\StaticObject {
 			'conditions' => array('ajax' => true)
 		));
 		$ajax['content'] = array(
-			'text/html', 'application/xhtml+xml',//html 
+			'text/html', 'application/xhtml+xml',//html
 			'application/x-www-form-urlencoded',//form
 			'application/javascript', 'text/javascript'//js
 		);
@@ -274,10 +310,8 @@ class Scaffold extends \lithium\core\StaticObject {
 		$controller = null;
 		if (isset($config['controller'])) {
 			if (!class_exists($config['controller'])) {
-				if (strpos($config['controller'],'\\') === false) {
-					if ($controller = Libraries::locate('controllers', $config['controller'])) {
-						$controller = '\\' . $controller;
-					}
+				if (strpos($config['controller'], '\\') === false) {
+					$controller = Libraries::locate('controllers', $config['controller']);
 				}
 			} else {
 				$controller = $config['controller'];
@@ -323,10 +357,8 @@ class Scaffold extends \lithium\core\StaticObject {
 		$model = null;
 		if (isset($config['model'])) {
 			if (!class_exists($config['model'])) {
-				if (strpos($config['model'],'\\') === false) {
-					if($model = Libraries::locate('models', $config['model'])) {
-						$model = '\\' . $model;
-					}
+				if (strpos($config['model'], '\\') === false) {
+					$model = Libraries::locate('models', $config['model']);
 				}
 			} else {
 				$model = $config['model'];
