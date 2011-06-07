@@ -185,7 +185,7 @@ class Model extends \lithium\data\Model {
 			"get" . ucfirst($setName),
 			"getScaffoldFields"
 		);
-		
+
 		$fields = array();
 		switch (true) {
 			case method_exists($model, $getters[0]):
@@ -201,13 +201,13 @@ class Model extends \lithium\data\Model {
 				$fields = $model::$scaffoldFields;
 				break;
 		}
-		
+
 		$filter = function($self, $params) {
 			extract($params);
 			if (empty($fields)) {
 				$schema = $model::schema();
 				$keys = array_keys($schema);
-				$fieldsNames = array_map('\lithium\util\Inflector::humanize', $keys);
+				$fieldsNames = array_map('lithium\util\Inflector::humanize', $keys);
 				$fields = array_combine($keys, $fieldsNames);
 			} else {
 				$_fields = $fields;
@@ -222,7 +222,7 @@ class Model extends \lithium\data\Model {
 			}
 			return $fields;
 		};
-		
+
 		$params = compact('fields', 'fieldset', 'model');
 		return static::_filter(__FUNCTION__, $params, $filter);
 	}
@@ -247,7 +247,7 @@ class Model extends \lithium\data\Model {
 			"get" . ucfirst($setName),
 			"getScaffoldFormFields"
 		);
-		
+
 		$fields = array();
 		switch (true) {
 			case method_exists($model, $getters[0]):
@@ -263,7 +263,7 @@ class Model extends \lithium\data\Model {
 				$fields = $model::$scaffoldFormFields;
 				break;
 		}
-		
+
 		$filter = function($self, $params) {
 			extract($params);
 			if (empty($fields)) {
@@ -287,11 +287,11 @@ class Model extends \lithium\data\Model {
 					if (!isset($_fieldset['legend'])) {
 						$_fieldset['legend'] = !is_int($key) ? $key : null;
 					}
-				}	
+				}
 			}
 			return $fields;
 		};
-		
+
 		$params = compact('fields', 'fieldset', 'mapping', 'model');
 		return static::_filter(__FUNCTION__, $params, $filter);
 	}
