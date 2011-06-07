@@ -185,8 +185,7 @@ class Scaffold extends \lithium\core\StaticObject {
 			$options+= array(
 				'scaffold' => $controller->scaffold
 			);
-			$controller->response = Controller::invoke($controller->request, $params, $options);
-			return $controller->response;
+			return Controller::invoke($controller->request, $params, $options);
 		}
 	}
 
