@@ -51,7 +51,7 @@ class ScaffoldController extends \lithium\action\Controller {
 			$record = $params['record'];
 			
 			if (!$record) {
-				return $self->redirect(array('action' => 'index'));
+				return $self->redirect($params['redirect']);
 			}
 			
 			$self->set($params);
@@ -75,7 +75,7 @@ class ScaffoldController extends \lithium\action\Controller {
 			$record = $params['record'];
 			
 			if (($self->request->data) && $record->save($self->request->data)) {
-				return $self->redirect(array('action' => 'index'));
+				return $self->redirect($params['redirect']);
 			}
 			
 			$self->set($params);
@@ -98,11 +98,11 @@ class ScaffoldController extends \lithium\action\Controller {
 			$record = $params['record'];
 			
 			if (!$record) {
-				return $self->redirect(array('action' => 'index'));
+				return $self->redirect($params['redirect']);
 			}
 			
 			if (($self->request->data) && $record->save($self->request->data)) {
-				return $self->redirect(array('action' => 'index'));
+				return $self->redirect($params['redirect']);
 			}
 			
 			$self->set($params);
@@ -124,7 +124,7 @@ class ScaffoldController extends \lithium\action\Controller {
 			if ($record) {
 				$record->delete();
 			}
-			return $self->redirect(array('action' => 'index'));
+			return $self->redirect($params['redirect']);
 		};
 		
 		return $this->_filter(__METHOD__, $params, $filter);
@@ -151,7 +151,8 @@ class ScaffoldController extends \lithium\action\Controller {
 			'model' => Scaffold::model($this->scaffold['name']),
 			'plural' => Inflector::pluralize($name),
 			'singular' => Inflector::singularize($name),
-			'actions' => Scaffold::handledAction($name)
+			'actions' => Scaffold::handledAction($name),
+			'redirect' => array('action' => 'index')
 		);
 		$this->set($vars);
 		return $vars;
