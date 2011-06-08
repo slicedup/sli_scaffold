@@ -8,12 +8,12 @@
 
 namespace slicedup_scaffold\core;
 
+use lithium\action\Dispatcher;
 use lithium\core\Libraries;
 use lithium\net\http\Media;
 use lithium\util\Set;
 use lithium\util\Inflector;
 use slicedup_scaffold\extensions\data\Model;
-use slicedup_core\action\Controller;
 use BadMethodCallException;
 
 class Scaffold extends \lithium\core\StaticObject {
@@ -148,19 +148,6 @@ class Scaffold extends \lithium\core\StaticObject {
 	}
 
 	/**
-	 * Get controller name as configured by scaffold
-	 *
-	 * @param array $params params passed in Dispatcher::_callable()
-	 * @return controller
-	 */
-	public static function callable($params){
-		$name = static::name($params['params']);
-		if ($controller = static::controller($name)) {
-			return $controller;
-		}
-	}
-
-	/**
 	 * Obtain default scaffold name from dispatch params
 	 *
 	 * @param $params
@@ -171,21 +158,37 @@ class Scaffold extends \lithium\core\StaticObject {
 	}
 
 	/**
-	 * Invokes a scaffolded action for the current controller/request using the
-	 * default scaffold controller and sets it as the response of the current
-	 * controller.
+	 * Invokes a scaffolded action on the default scaffold controller based on
+	 * the current controller/request using the.
 	 */
-	public static function invoke(&$controller, $params = array(), array $options = array()) {
+	public static function invoke($controller, array $params = array(), array $options = array()) {
+		if ($callable = static::callable($controller, $params, $options)) {
+			return static::call($callable, $params);
+		}
+	}
+
+	/**
+	 * Creates a default scaffold controller instance based on the current
+	 * controller/request.
+	 */
+	public static function callable($controller, array &$params = array(), array $options = array()) {
 		if (property_exists($controller, 'scaffold')) {
 			static::setMediaPaths();
-			if (!is_array($params)) {
-				$params = array('action' => $params);
-			}
+			$params += $controller->request->params;
 			$params['controller'] = static::$_classes['controller'];
 			$options+= array(
 				'scaffold' => $controller->scaffold
 			);
-			return Controller::invoke($controller->request, $params, $options);
+			return Dispatcher::invokeMethod('_callable', array($controller->request, $params, $options));
+		}
+	}
+
+	/**
+	 * Convenience wrapper for invoking scaffold controllers.
+	 */
+	public static function call($controller, $params) {
+		if (property_exists($controller, 'scaffold')) {
+			return Dispatcher::invokeMethod('_call', array($controller, $controller->request, $params));
 		}
 	}
 
@@ -224,6 +227,7 @@ class Scaffold extends \lithium\core\StaticObject {
 				$scaffold = get_called_class();
 				$controller->applyFilter('__invoke', function($self, $params, $chain) use($scaffold){
 					$dispatchParams = $params['dispatchParams'];
+					$dispatchParams = $dispatchParams ?: array();
 					$options = $params['options'];
 					return $scaffold::invoke($self, $dispatchParams, $options);
 				});

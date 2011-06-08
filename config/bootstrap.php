@@ -15,10 +15,9 @@ use slicedup_scaffold\core\Scaffold;
  */
 Dispatcher::applyFilter('_callable', function($self, $params, $chain) {
 	$scaffoldName = Scaffold::name($params['params']);
-
 	$controller = $params['params']['controller'];
 	if(!Libraries::locate('controllers', $controller)) {
-		if($controller = Scaffold::callable($params)) {
+		if ($controller = Scaffold::controller($scaffoldName)) {
 			$params['params']['controller'] = $controller;
 		}
 	}
@@ -26,6 +25,9 @@ Dispatcher::applyFilter('_callable', function($self, $params, $chain) {
 	$controller = $chain->next($self, $params, $chain);
 
 	if (property_exists($controller, 'scaffold')) {
+		if (isset($controller->scaffold['name'])) {
+			$scaffoldName = $controller->scaffold['name'];
+		}
 		Scaffold::prepare($scaffoldName, $controller, $params);
 	}
 

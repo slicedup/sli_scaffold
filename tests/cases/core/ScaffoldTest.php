@@ -191,44 +191,10 @@ class ScaffoldTest extends \lithium\test\Unit {
 		$this->assertEqual('mock_posts', $meta['source']);
 	}
 
-	public function testCallable() {
-		$params = $this->_request();
-		$expected = 'slicedup_scaffold\controllers\ScaffoldController';
-		$result = Scaffold::callable($params);
-		$this->assertEqual($expected, $result);
-
-		Scaffold::config(false);
-		$params = $this->_request();
-		$result = Scaffold::callable($params);
-		$this->assertFalse($result);
-
-		Scaffold::set('posts');
-		$params = $this->_request();
-		$result = Scaffold::callable($params);
-		$this->assertEqual($expected, $result);
-
-		$config = array(
-			'controller' => 'slicedup_scaffold\tests\mocks\controllers\NonExistentController'
-		);
-		Scaffold::set('posts', $config);
-		$params = $this->_request();
-		$result = Scaffold::callable($params);
-		$this->assertEqual($expected, $result);
-
-		$expected = 'slicedup_scaffold\tests\mocks\controllers\MockController';
-		$config = array(
-			'controller' => $expected
-		);
-		Scaffold::set('posts', $config);
-		$params = $this->_request();
-		$result = Scaffold::callable($params);
-		$this->assertEqual($expected, $result);
-	}
-
 	public function testControllerPrepare() {
 		$params = $this->_request();
 		$options = array('request' => $params['request']) + $params['options'];
-		$controller = Libraries::instance('controllers', Scaffold::callable($params), $options);
+		$controller = Libraries::instance('controllers', Scaffold::controller('posts'), $options);
 
 		$this->assertNull($controller->scaffold);
 		Scaffold::prepare('posts', $controller, $params);
@@ -237,7 +203,7 @@ class ScaffoldTest extends \lithium\test\Unit {
 		$this->assertIdentical('posts', $controller->scaffold['name']);
 	}
 
-	public function testInvoke() {
+	public function testControllerInvoke() {
 		$expected = 'slicedup_scaffold\tests\mocks\controllers\MockController';
 		$config = array(
 			'controller' => $expected
@@ -245,17 +211,23 @@ class ScaffoldTest extends \lithium\test\Unit {
 		Scaffold::set('posts', $config);
 		$params = $this->_request();
 		$options = array('request' => $params['request']) + $params['options'];
-		$controller = Libraries::instance('controllers', Scaffold::callable($params), $options);
-		$this->assertTrue($controller instanceOf $expected);
-
+		$controller = Libraries::instance('controllers', Scaffold::controller('posts'), $options);
 		Scaffold::prepare('posts', $controller, $params);
-		$result = $controller($params['request'], $params['params']);
-		$this->assertTrue($result instanceOf \lithium\action\Response);
-
-		$controller = Libraries::instance('controllers', Scaffold::callable($params), $options);
 		$this->assertTrue($controller instanceOf $expected);
-		$this->expectException('Action `index` not found.');
-		$controller($params['request'], $params['params']);
+
+		$params = array();
+		$scaffold = Scaffold::callable($controller, $params);
+
+		$expected = 'slicedup_scaffold\controllers\ScaffoldController';
+		$this->assertTrue($scaffold instanceOf $expected);
+
+		$expected = Scaffold::invoke($controller);
+		$result = Scaffold::call($controller, $params);
+		$this->assertEqual($expected, $result);
+
+		$params = $this->_request();
+		$result = $controller($params['request'], $params['params']);
+		$this->assertEqual($expected, $result);
 	}
 
 	public function testModelCalls(){
