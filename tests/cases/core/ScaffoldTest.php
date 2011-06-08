@@ -81,6 +81,52 @@ class ScaffoldTest extends \lithium\test\Unit {
 		$this->assertTrue(!empty($result));
 	}
 
+	public function testName() {
+		$expected = 'posts';
+
+		$params = array(
+			'controller' => 'app\controllers\PostsController'
+		);
+		$result = Scaffold::name($params);
+		$this->assertEqual($expected, $result);
+		$params = array(
+			'controller' => 'Posts'
+		);
+		$result = Scaffold::name($params);
+		$this->assertEqual($expected, $result);
+
+		$params = 'app\controllers\PostsController';
+		$result = Scaffold::name($params);
+		$this->assertEqual($expected, $result);
+
+		$params = array(
+			'library' => 'app',
+			'controller' => 'Posts'
+		);
+		$result = Scaffold::name($params);
+		$this->assertEqual($expected, $result);
+
+		$params = 'Posts';
+		$result = Scaffold::name($params);
+		$this->assertEqual($expected, $result);
+
+		$expected = 'lib_posts';
+		$params = 'lib\controllers\PostsController';
+		$result = Scaffold::name($params);
+		$this->assertEqual($expected, $result);
+
+		$params = 'lib.Posts';
+		$result = Scaffold::name($params);
+		$this->assertEqual($expected, $result);
+
+		$params = array(
+			'library' => 'lib',
+			'controller' => 'Posts'
+		);
+		$result = Scaffold::name($params);
+		$this->assertEqual($expected, $result);
+	}
+
 	public function testScaffoldConfig() {
 		$config = Scaffold::config();
 		$newConfig = array(
