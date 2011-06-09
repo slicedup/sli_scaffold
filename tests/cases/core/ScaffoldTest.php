@@ -110,12 +110,12 @@ class ScaffoldTest extends \lithium\test\Unit {
 		$result = Scaffold::name($params);
 		$this->assertEqual($expected, $result);
 
-		$expected = 'lib_posts';
+		$expected = 'lib\posts';
 		$params = 'lib\controllers\PostsController';
 		$result = Scaffold::name($params);
 		$this->assertEqual($expected, $result);
 
-		$params = 'lib.Posts';
+		$params = 'lib\Posts';
 		$result = Scaffold::name($params);
 		$this->assertEqual($expected, $result);
 

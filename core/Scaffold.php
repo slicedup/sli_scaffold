@@ -159,7 +159,7 @@ class Scaffold extends \lithium\core\StaticObject {
 		} else {
 			$name = $params['controller'];
 			if (!empty($params['library'])) {
-				$name = $params['library'] . '/' . $name;
+				$name = $params['library'] . '\\' . $name;
 			}
 		}
 		return static::_name($name);
@@ -171,9 +171,17 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param string $name
 	 * @return string mixed
 	 */
-	protected static function _name($name) {
+	protected static function _name($name, $full = false) {
+		$library = 'app\\';
+		if ($lib = strpos($name, '\\')) {
+			$library = substr($name, 0, $lib + 1);
+			$name = substr($name, $lib + 1);
+		}
 		$name = Inflector::underscore($name);
-		$name = trim(preg_replace('/^app_|_?controller(s)?/', '', $name), ' _');
+		$name = trim(preg_replace('/_?controller(s)?/', '', $name), ' _');
+		if ($library != 'app\\' || $full) {
+			$name = $library . $name;
+		}
 		return $name;
 	}
 
