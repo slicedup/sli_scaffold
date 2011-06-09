@@ -25,8 +25,7 @@ class Scaffold extends \lithium\core\StaticObject {
 	 */
 	protected static $_config = array(
 		'all' => true,
-		'model' => array(),
-		'controller' => array()
+		'paths' => true
 	);
 
 	/**
@@ -201,12 +200,15 @@ class Scaffold extends \lithium\core\StaticObject {
 	 */
 	public static function callable($controller, array &$params = array(), array $options = array()) {
 		if (property_exists($controller, 'scaffold')) {
-			static::setMediaPaths($controller->scaffold['name']);
+			$config = $controller->scaffold;
 			$params += $controller->request->params;
 			$params['controller'] = static::$_classes['controller'];
 			$options+= array(
-				'scaffold' => $controller->scaffold
+				'scaffold' => $config
 			);
+			if ((isset($config['paths']) && $config['paths']) || static::$_config['paths']) {
+				static::paths($config['name']);
+			}
 			return Dispatcher::invokeMethod('_callable', array($controller->request, $params, $options));
 		}
 	}
@@ -238,7 +240,6 @@ class Scaffold extends \lithium\core\StaticObject {
 
 		if (property_exists($controller, 'scaffold')) {
 			$name = static::_name($name);
-			static::setMediaPaths($name);
 			//merge Controller::scaffold with config
 			$config = static::get($name);
 			$config = (array) $controller->scaffold + $config;
@@ -247,7 +248,10 @@ class Scaffold extends \lithium\core\StaticObject {
 			$controller->scaffold = compact('name') + $config;
 			//update stored config
 			static::set($name, $config);
-
+			//set paths
+			if ((isset($config['paths']) && $config['paths']) || static::$_config['paths']) {
+				static::paths($name);
+			}
 			//Check action for current controller, invoke scaffold controller
 			//for undeclared actions when action is envoked
 			$action = $params['params']['action'];
@@ -265,74 +269,61 @@ class Scaffold extends \lithium\core\StaticObject {
 
 	/**
 	 * Set media paths to allow universal scaffold template usage
+	 *
+	 * @param $name string scaffold config name
+	 * @return null
+	 * @filter
 	 */
-	public static function setMediaPaths($name = null) {
+	public static function paths($name = null) {
+		if ($name) {
+			$name = static::_name($name, true);
+		}
 		$scaffold = Libraries::get('slicedup_scaffold');
-		$html = Media::type('html');
-		Media::type('html', $html['content'], Media::defaults() + $html['options']);
-		Media::addPaths('html', array(
-			'template' => array(
-				'{:library}/views/scaffold/{:template}.html.php',
-				$scaffold['path'] . '/views/scaffold/{:template}.html.php'
-			),
-			'layout' => array(
-				LITHIUM_APP_PATH . '/views/layouts/{:layout}.html.php'
-			)
-		));
-		if ($name) {
-			Media::addPaths('html', array(
+		$paths = array(
+			'append' => array(
 				'template' => array(
-					'{:library}/views/'.$name.'/{:template}.html.php'
-				)
-			));
-		}
-
-		if(!Media::type('ajax')) {
-			$content = array(
-				'text/html', 'application/xhtml+xml',//html
-				'application/javascript', 'text/javascript'//js
-			);
-			$options = array(
-				'view' => '\lithium\template\View',
-				'paths' => array(
-					'template' => array(
-						'{:library}/views/{:controller}/{:template}.ajax.php',
-						'{:library}/views/{:controller}/{:template}.html.php',
-					),
-					'layout' => array(
-						'{:library}/views/layouts/{:layout}.ajax.php',
-						'{:library}/views/layouts/{:layout}.html.php',
-					),
-					'element' => array(
-						'{:library}/views/elements/{:template}.ajax.php',
-						'{:library}/views/elements/{:template}.html.php'
-					)
+					'{:library}/views/scaffold/{:template}.{:type}.php', //lib scaffolds
+					LITHIUM_APP_PATH . '/views/scaffold/{:template}.{:type}.php', //app scaffolds
+					$scaffold['path'] . '/views/scaffold/{:template}.{:type}.php' //default scaffolds
 				),
-				'conditions' => array('ajax' => true)
-			);
-			Media::type('ajax', $content, Media::defaults() + $options);
-		}
-
-		Media::addPaths('ajax', array(
-			'template' => array(
-				'{:library}/views/scaffold/{:template}.ajax.php',
-				'{:library}/views/scaffold/{:template}.html.php',
-				$scaffold['path'] . '/views/scaffold/{:template}.html.php'
+				'layout' => array(
+					LITHIUM_APP_PATH . '/views/layouts/{:layout}.{:type}.php' //app layout
+				)
 			),
-			'layout' => array(
-				LITHIUM_APP_PATH . '/views/layouts/{:layout}.ajax.php',
-				LITHIUM_APP_PATH . '/views/layouts/{:layout}.html.php'
-			)
-		), false);
+			'prepend' => array()
+		);
 
 		if ($name) {
-			Media::addPaths('ajax', array(
-				'template' => array(
-					'{:library}/views/'.$name.'/{:template}.ajax.php',
-					'{:library}/views/'.$name.'/{:template}.html.php',
-				)
-			));
+			list($library, $_name) = explode('\\', $name);
+			$library = Libraries::get($library);
+			$libPath = '{:library}';
+			$paths['prepend']['template'] = array(
+				$library['path'] . '/views/'.$_name.'/{:template}.{:type}.php',
+				$library['path'] . '/views/{:controller}/{:template}.{:type}.php'
+			);
+			$paths['prepend']['layout'] = array(
+				$library['path'] . '/views/layouts/{:layout}.{:type}.php'
+			);
 		}
+
+		$params = compact('paths') + array('name' => $name);
+
+		$filter = function($self, $params, $chain){
+			$name = $params['name'];
+			$paths = $params['paths'];
+			$html = Media::type('html');
+			if (empty($html['options']['paths'])) {
+				Media::type('html', $html['content'], $html['options'] + Media::defaultOptions());
+			}
+			if (!empty($paths['prepend'])) {
+				Media::addPaths('html', $paths['prepend']);
+			}
+			if (!empty($paths['append'])) {
+				Media::addPaths('html', $paths['append'], false);
+			}
+		};
+
+		static::_filter(__FUNCTION__, $params, $filter);
 	}
 
 	/**
