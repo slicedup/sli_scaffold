@@ -9,6 +9,8 @@
 namespace slicedup_scaffold\controllers;
 
 use lithium\util\Inflector;
+use lithium\util\String;
+use slicedup_core\action\FlashMessage;
 use slicedup_scaffold\core\Scaffold;
 
 class ScaffoldController extends \lithium\action\Controller {
@@ -24,109 +26,144 @@ class ScaffoldController extends \lithium\action\Controller {
 		$vars = $this->_scaffoldVars();
 		$fields = Scaffold::getSummaryFields($vars['model']);
 		$params = $vars + compact('fields');
-		
+
 		$filter = function($self, $params){
 			$model = $params['model'];
 			if (empty($params['recordSet'])) {
 				$params['recordSet'] = $model::all();
 			}
-			
+
 			$self->set($params);
 			return $params;
 		};
-		
+
 		return $this->_filter(__METHOD__, $params, $filter);
 	}
 
 	public function view() {
 		$vars = $this->_scaffoldVars();
 		$fields = Scaffold::getDetailFields($vars['model']);
-		$params = $vars + compact('fields');
-		
+		$messages = array(
+			'notfound' => '{:singular} not found.'
+		);
+		$params = $vars + compact('fields', 'messages');
+
 		$filter = function($self, $params){
 			$model = $params['model'];
+			$messages = $params['messages'];
 			if (empty($params['record'])) {
 				$params['record'] = $model::first($self->request->id);
 			}
 			$record = $params['record'];
-			
 			if (!$record) {
+				$self->flash('error', 'notfound', $messages, $params);
 				return $self->redirect($params['redirect']);
 			}
-			
+
 			$self->set($params);
 			return $params;
 		};
-		
+
 		return $this->_filter(__METHOD__, $params, $filter);
-		
+
 	}
 
 	public function add() {
 		$vars = $this->_scaffoldVars();
 		$fields = Scaffold::getCreateFormFields($vars['model']);
-		$params = $vars + compact('fields');
-		
+		$messages = array(
+			'error' => '{:singular} could not be created.',
+			'success' => '{:singular} created.'
+		);
+		$params = $vars + compact('fields', 'messages');
+
 		$filter = function($self, $params){
 			$model = $params['model'];
+			$messages = $params['messages'];
 			if (empty($params['record'])) {
 				$params['record'] = $model::create();
 			}
 			$record = $params['record'];
-			
-			if (($self->request->data) && $record->save($self->request->data)) {
-				return $self->redirect($params['redirect']);
+
+			if ($self->request->data) {
+				if ($record->save($self->request->data)) {
+					$this->flash('success', 'success', $messages, $params);
+					return $self->redirect($params['redirect']);
+				}
+				$this->flash('error', 'error', $messages, $params);
 			}
-			
+
 			$self->set($params);
 			return $params;
 		};
-		
+
 		return $this->_filter(__METHOD__, $params, $filter);
 	}
 
 	public function edit() {
 		$vars = $this->_scaffoldVars();
 		$fields = Scaffold::getUpdateFormFields($vars['model']);
-		$params = $vars + compact('fields');
-		
+		$messages = array(
+			'notfound' => '{:singular} not found.',
+			'error' => '{:singular} could not be updated.',
+			'success' => '{:singular} updated.'
+		);
+		$params = $vars + compact('fields', 'messages');
+
 		$filter = function($self, $params){
 			$model = $params['model'];
+			$messages = $params['messages'];
 			if (empty($params['record'])) {
 				$params['record'] = $model::find($self->request->id);
 			}
 			$record = $params['record'];
-			
+
 			if (!$record) {
+				$self->flash('error', 'notfound', $messages, $params);
 				return $self->redirect($params['redirect']);
 			}
-			
-			if (($self->request->data) && $record->save($self->request->data)) {
-				return $self->redirect($params['redirect']);
+
+			if ($self->request->data) {
+				if ($record->save($self->request->data)) {
+					$this->flash('success', 'success', $messages, $params);
+					return $self->redirect($params['redirect']);
+				}
+				$this->flash('error', 'error', $messages, $params);
 			}
-			
+
 			$self->set($params);
 			return $params;
 		};
-		
+
 		return $this->_filter(__METHOD__, $params, $filter);
 	}
 
 	public function delete() {
-		$params = $this->_scaffoldVars();
-		
+		$vars = $this->_scaffoldVars();
+		$messages = array(
+			'notfound' => '{:singular} not found.',
+			'error' => '{:singular} could not be deleted.',
+			'success' => '{:singular} deleted.'
+		);
+		$params = $vars + compact('messages');
+
 		$filter = function($self, $params){
 			$model = $params['model'];
+			$messages = $params['messages'];
 			if (empty($params['record'])) {
 				$params['record'] = $model::find($self->request->id);
 			}
 			$record = $params['record'];
-			if ($record) {
-				$record->delete();
+			if (!$record) {
+				$self->flash('error', 'notfound', $messages, $params);
+			} elseif($record->delete()) {
+				$this->flash('success', 'success', $messages, $params);
+			} else {
+				$this->flash('error', 'error', $messages, $params);
 			}
 			return $self->redirect($params['redirect']);
 		};
-		
+
 		return $this->_filter(__METHOD__, $params, $filter);
 	}
 
@@ -143,6 +180,25 @@ class ScaffoldController extends \lithium\action\Controller {
 		};
 
 		return $this->_filter(__METHOD__, $params, $filter);
+	}
+
+	public function flash($key, $messageKey, $messages, $data = array()) {
+		if (!empty($messages[$messageKey])) {
+			$flash = array($messages[$messageKey], $data);
+			$message = $this->invokeMethod('_formatFlash', $flash);
+			return FlashMessage::invokeMethod($key, $message);
+		}
+	}
+
+	protected function _formatFlash($message, $vars) {
+		if (!is_array($message)) {
+			$message = array($message);
+		}
+		if ($string = array_shift($message)) {
+			$string = String::insert($string, $vars);
+			array_unshift($message, $string);
+			return $message;
+		}
 	}
 
 	protected function _scaffoldVars () {
