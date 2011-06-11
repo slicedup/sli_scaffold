@@ -87,10 +87,10 @@ class ScaffoldController extends \lithium\action\Controller {
 
 			if ($self->request->data) {
 				if ($record->save($self->request->data)) {
-					$this->flash('success', 'success', $messages, $params);
+					$self->flash('success', 'success', $messages, $params);
 					return $self->redirect($params['redirect']);
 				}
-				$this->flash('error', 'error', $messages, $params);
+				$self->flash('error', 'error', $messages, $params);
 			}
 
 			$self->set($params);
@@ -125,10 +125,10 @@ class ScaffoldController extends \lithium\action\Controller {
 
 			if ($self->request->data) {
 				if ($record->save($self->request->data)) {
-					$this->flash('success', 'success', $messages, $params);
+					$self->flash('success', 'success', $messages, $params);
 					return $self->redirect($params['redirect']);
 				}
-				$this->flash('error', 'error', $messages, $params);
+				$self->flash('error', 'error', $messages, $params);
 			}
 
 			$self->set($params);
@@ -157,9 +157,9 @@ class ScaffoldController extends \lithium\action\Controller {
 			if (!$record) {
 				$self->flash('error', 'notfound', $messages, $params);
 			} elseif($record->delete()) {
-				$this->flash('success', 'success', $messages, $params);
+				$self->flash('success', 'success', $messages, $params);
 			} else {
-				$this->flash('error', 'error', $messages, $params);
+				$self->flash('error', 'error', $messages, $params);
 			}
 			return $self->redirect($params['redirect']);
 		};
