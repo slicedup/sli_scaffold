@@ -6,7 +6,7 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\extensions\helper\scaffold;
+namespace sli_scaffold\extensions\helper\scaffold;
 
 class Field extends \lithium\core\Object {
 
@@ -27,7 +27,7 @@ class Field extends \lithium\core\Object {
 	/**
 	 * Fieldset object field is bound to
 	 *
-	 * @var slicedup_scaffold\extensions\helper\scaffold\Fieldset
+	 * @var sli_scaffold\extensions\helper\scaffold\Fieldset
 	 */
 	protected $_fieldset = null;
 
@@ -54,10 +54,10 @@ class Field extends \lithium\core\Object {
 	/**
 	 * Get/Set fieldset context
 	 *
-	 * @param \slicedup_scaffold\extensions\helper\scaffold\Form $form
+	 * @param \sli_scaffold\extensions\helper\scaffold\Form $form
 	 */
 	public function fieldset($fieldset = null) {
-		$fieldsetClass = '\slicedup_scaffold\extensions\helper\scaffold\Fieldset';
+		$fieldsetClass = '\sli_scaffold\extensions\helper\scaffold\Fieldset';
 		if ($fieldset instanceOf $fieldsetClass) {
 			$this->_fieldset = $fieldset;
 		}

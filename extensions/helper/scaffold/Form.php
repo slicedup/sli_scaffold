@@ -6,7 +6,7 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\extensions\helper\scaffold;
+namespace sli_scaffold\extensions\helper\scaffold;
 
 use RuntimeException;
 
@@ -57,7 +57,7 @@ class Form extends \lithium\util\Collection {
 	 * @var array
 	 */
 	protected $_classes = array(
-		'fieldset' => '\slicedup_scaffold\extensions\helper\scaffold\Fieldset'
+		'fieldset' => '\sli_scaffold\extensions\helper\scaffold\Fieldset'
 	);
 
 	/**

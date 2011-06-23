@@ -6,7 +6,7 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\models;
+namespace sli_scaffold\models;
 
 /**
  * The `Scaffolds` model class is used as a model stub to access datasources

@@ -6,15 +6,15 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\tests\cases\extensions\helper\scaffold;
+namespace sli_scaffold\tests\cases\extensions\helper\scaffold;
 
 use lithium\test;
 
-use slicedup_scaffold\extensions\helper\scaffold;
+use sli_scaffold\extensions\helper\scaffold;
 
-use slicedup_scaffold\extensions\helper\scaffold\Form;
+use sli_scaffold\extensions\helper\scaffold\Form;
 
-class FormTest extends \slicedup_scaffold\tests\cases\extensions\helper\ScaffoldBaseTest {
+class FormTest extends \sli_scaffold\tests\cases\extensions\helper\ScaffoldBaseTest {
 
 	public function testBasicForm() {
 		$form = new Form(array('context' => $this->context));

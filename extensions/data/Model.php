@@ -6,7 +6,7 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\extensions\data;
+namespace sli_scaffold\extensions\data;
 
 use lithium\util\Inflector;
 use BadMethodCallException;
@@ -19,13 +19,13 @@ use BadMethodCallException;
  * Scaffold fieldset properties should be added to your models as needed and
  * querried like so:
  * {{{
- * use slicedup_scaffold\core\Scaffold;
+ * use sli_scaffold\core\Scaffold;
  * Scaffold::getSummaryFields($model);
  * Scaffold::getAddFormFields($model);
  * }}}
  * or directly from this class via
  * {{{
- * use slicedup_scaffold\extensions\data\Model;
+ * use sli_scaffold\extensions\data\Model;
  * Model::getFields($model, 'summary');
  * Model::getFormFields($model, 'add');
  * }}}
@@ -50,7 +50,7 @@ class Model extends \lithium\data\Model {
 	 * Items can either be collumn/field name values with integer keys, or
 	 * collumn/field names as keys with aliased names as values
 	 *
-	 * @see slicedup_scaffold\core\Scaffold::getFieldset()
+	 * @see sli_scaffold\core\Scaffold::getFieldset()
 	 * @var array
 	 */
 	public $scaffoldFields;
@@ -60,7 +60,7 @@ class Model extends \lithium\data\Model {
 	 *
 	 * Array of collumn/field names to be used for record summaries
 	 *
-	 * @see slicedup_scaffold\extensions\data\Model::scaffoldFields
+	 * @see sli_scaffold\extensions\data\Model::scaffoldFields
 	 * @var array
 	 */
 	public $summaryFields;
@@ -70,7 +70,7 @@ class Model extends \lithium\data\Model {
 	 *
 	 * Array of collumn/field names to be used for full record details
 	 *
-	 * @see slicedup_scaffold\extensions\data\Model::scaffoldFields
+	 * @see sli_scaffold\extensions\data\Model::scaffoldFields
 	 * @var array
 	 */
 	public $detailFields;
@@ -130,7 +130,7 @@ class Model extends \lithium\data\Model {
 	 * Array of collumn/field names & form field mapping for use in record
 	 * add/create forms
 	 *
-	 * @see slicedup_scaffold\extensions\data\Model::scaffoldFormFields
+	 * @see sli_scaffold\extensions\data\Model::scaffoldFormFields
 	 * @var array
 	 */
 	public $createFormFields;
@@ -141,7 +141,7 @@ class Model extends \lithium\data\Model {
 	 * Array of collumn/field names & form field mapping for use in record
 	 * edit/update forms
 	 *
-	 * @see slicedup_scaffold\extensions\data\Model::scaffoldFormFields
+	 * @see sli_scaffold\extensions\data\Model::scaffoldFormFields
 	 * @var array
 	 */
 	public $updateFormFields;

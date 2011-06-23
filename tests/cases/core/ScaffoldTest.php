@@ -6,12 +6,12 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\tests\cases\core;
+namespace sli_scaffold\tests\cases\core;
 
 use lithium\test;
 
-use slicedup_scaffold\core\Scaffold;
-use slicedup_scaffold\tests\mocks\data\MockPost;
+use sli_scaffold\core\Scaffold;
+use sli_scaffold\tests\mocks\data\MockPost;
 use lithium\action\Request;
 use lithium\net\http\Router;
 use lithium\action\Dispatcher;
@@ -22,12 +22,12 @@ use lithium\data\Connections;
 Libraries::paths(array(
 	'controllers' => Set::merge(Libraries::paths('controllers'), array(
 		'{:library}\tests\mocks\controllers\{:name}' => array(
-			'libraries' => array('slicedup_scaffold')
+			'libraries' => array('sli_scaffold')
 		)
 	)),
 	'models' => Set::merge((array) Libraries::paths('models'), array(
 		'{:library}\tests\mocks\data\{:name}' => array(
-			'libraries' => array('slicedup_scaffold')
+			'libraries' => array('sli_scaffold')
 		)
 	))
 ));
@@ -153,7 +153,7 @@ class ScaffoldTest extends \lithium\test\Unit {
 
 	public function testScaffoldSetGet() {
 		$config = array(
-			'controller' => 'slicedup_scaffold\tests\mocks\controllers\MockController'
+			'controller' => 'sli_scaffold\tests\mocks\controllers\MockController'
 		);
 		Scaffold::set('posts', $config);
 		$expected = $config + array('model' => null);
@@ -166,25 +166,25 @@ class ScaffoldTest extends \lithium\test\Unit {
 		Scaffold::set('posts');
 		$result = Scaffold::get('posts');
 		$this->assertNull($result['controller']);
-		$expected = 'slicedup_scaffold\controllers\ScaffoldController';
+		$expected = 'sli_scaffold\controllers\ScaffoldController';
 		$this->assertIdentical($expected, Scaffold::controller('posts'));
 
 		$config = array(
-			'controller' => 'slicedup_scaffold\tests\mocks\controllers\NonExistentController'
+			'controller' => 'sli_scaffold\tests\mocks\controllers\NonExistentController'
 		);
 		Scaffold::set('posts', $config);
-		$expected = 'slicedup_scaffold\controllers\ScaffoldController';
+		$expected = 'sli_scaffold\controllers\ScaffoldController';
 		$this->assertIdentical($expected, Scaffold::controller('posts'));
 
 		$config = array(
 			'controller' => 'NonExistentController'
 		);
 		Scaffold::set('posts', $config);
-		$expected = 'slicedup_scaffold\controllers\ScaffoldController';
+		$expected = 'sli_scaffold\controllers\ScaffoldController';
 		$this->assertIdentical($expected, Scaffold::controller('posts'));
 
 		$config = array(
-			'controller' => 'slicedup_scaffold\tests\mocks\controllers\MockController'
+			'controller' => 'sli_scaffold\tests\mocks\controllers\MockController'
 		);
 		Scaffold::set('posts', $config);
 		$expected = $config['controller'];
@@ -194,7 +194,7 @@ class ScaffoldTest extends \lithium\test\Unit {
 			'controller' => 'MockController'
 		);
 		Scaffold::set('posts', $config);
-		$expected = 'slicedup_scaffold\tests\mocks\controllers\MockController';
+		$expected = 'sli_scaffold\tests\mocks\controllers\MockController';
 		$this->assertIdentical($expected, Scaffold::controller('posts'));
 	}
 
@@ -202,25 +202,25 @@ class ScaffoldTest extends \lithium\test\Unit {
 		Scaffold::set('posts');
 		$result = Scaffold::get('posts');
 		$this->assertNull($result['model']);
-		$expected = 'slicedup_scaffold\models\Scaffolds';
+		$expected = 'sli_scaffold\models\Scaffolds';
 		$this->assertIdentical($expected, Scaffold::model('posts'));
 
 		$config = array(
-			'model' => 'slicedup_scaffold\tests\mocks\models\NonExistentModel'
+			'model' => 'sli_scaffold\tests\mocks\models\NonExistentModel'
 		);
 		Scaffold::set('posts', $config);
-		$expected = 'slicedup_scaffold\models\Scaffolds';
+		$expected = 'sli_scaffold\models\Scaffolds';
 		$this->assertIdentical($expected, Scaffold::model('posts'));
 
 		$config = array(
 			'model' => 'NonExistentModel'
 		);
 		Scaffold::set('posts', $config);
-		$expected = 'slicedup_scaffold\models\Scaffolds';
+		$expected = 'sli_scaffold\models\Scaffolds';
 		$this->assertIdentical($expected, Scaffold::model('posts'));
 
 		$config = array(
-			'model' => 'slicedup_scaffold\tests\mocks\data\MockPost'
+			'model' => 'sli_scaffold\tests\mocks\data\MockPost'
 		);
 		Scaffold::set('posts', $config);
 		$expected = $config['model'];
@@ -230,7 +230,7 @@ class ScaffoldTest extends \lithium\test\Unit {
 			'model' => 'MockPost'
 		);
 		Scaffold::set('posts', $config);
-		$expected = 'slicedup_scaffold\tests\mocks\data\MockPost';
+		$expected = 'sli_scaffold\tests\mocks\data\MockPost';
 		$this->assertIdentical($expected, Scaffold::model('posts'));
 		$meta = $expected::meta();
 		$this->assertEqual('MockPost', $meta['name']);
@@ -245,12 +245,12 @@ class ScaffoldTest extends \lithium\test\Unit {
 		$this->assertNull($controller->scaffold);
 		Scaffold::prepare('posts', $controller, $params);
 		$this->assertTrue(!empty($controller->scaffold));
-		$this->assertIdentical('slicedup_scaffold\controllers\ScaffoldController', $controller->scaffold['controller']);
+		$this->assertIdentical('sli_scaffold\controllers\ScaffoldController', $controller->scaffold['controller']);
 		$this->assertIdentical('posts', $controller->scaffold['name']);
 	}
 
 	public function testControllerInvoke() {
-		$expected = 'slicedup_scaffold\tests\mocks\controllers\MockController';
+		$expected = 'sli_scaffold\tests\mocks\controllers\MockController';
 		$config = array(
 			'controller' => $expected
 		);
@@ -264,7 +264,7 @@ class ScaffoldTest extends \lithium\test\Unit {
 		$params = array();
 		$scaffold = Scaffold::callable($controller, $params);
 
-		$expected = 'slicedup_scaffold\controllers\ScaffoldController';
+		$expected = 'sli_scaffold\controllers\ScaffoldController';
 		$this->assertTrue($scaffold instanceOf $expected);
 
 		$expected = Scaffold::invoke($controller);

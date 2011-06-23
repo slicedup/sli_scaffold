@@ -8,7 +8,7 @@
 
 use lithium\core\Libraries;
 use lithium\action\Dispatcher;
-use slicedup_scaffold\core\Scaffold;
+use sli_scaffold\core\Scaffold;
 
 /**
  * Dispatch filter to cathc scaffold requests

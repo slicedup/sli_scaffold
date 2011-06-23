@@ -6,15 +6,15 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\tests\cases\extensions\data;
+namespace sli_scaffold\tests\cases\extensions\data;
 
-use slicedup_scaffold\core\Scaffold;
-use slicedup_scaffold\extensions\data\Model;
+use sli_scaffold\core\Scaffold;
+use sli_scaffold\extensions\data\Model;
 use lithium\data\Connections;
 
 class ModelTest extends \lithium\test\Unit {
 
-	protected $_model = 'slicedup_scaffold\tests\mocks\data\MockPost';
+	protected $_model = 'sli_scaffold\tests\mocks\data\MockPost';
 
 	public function tearDown() {
 		$post = $this->_model;

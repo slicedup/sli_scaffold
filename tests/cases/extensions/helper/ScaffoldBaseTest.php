@@ -6,10 +6,10 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\tests\cases\extensions\helper;
+namespace sli_scaffold\tests\cases\extensions\helper;
 
-use slicedup_scaffold\extensions\helper\Scaffold as ScaffoldHelper;
-use slicedup_scaffold\core\Scaffold;
+use sli_scaffold\extensions\helper\Scaffold as ScaffoldHelper;
+use sli_scaffold\core\Scaffold;
 use lithium\action\Request;
 use lithium\net\http\Router;
 use lithium\data\entity\Record;

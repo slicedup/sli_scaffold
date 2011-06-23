@@ -6,11 +6,11 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\tests\cases\extensions\helper;
+namespace sli_scaffold\tests\cases\extensions\helper;
 
-use slicedup_scaffold\core\Scaffold;
+use sli_scaffold\core\Scaffold;
 
-class ScaffoldTest extends \slicedup_scaffold\tests\cases\extensions\helper\ScaffoldBaseTest {
+class ScaffoldTest extends \sli_scaffold\tests\cases\extensions\helper\ScaffoldBaseTest {
 
 	public function testUnconfiguredScaffold() {
 		$model = $this->_model;

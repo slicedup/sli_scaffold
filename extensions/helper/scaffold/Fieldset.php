@@ -6,7 +6,7 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\extensions\helper\scaffold;
+namespace sli_scaffold\extensions\helper\scaffold;
 
 use RuntimeException;
 
@@ -36,7 +36,7 @@ class Fieldset extends \lithium\util\Collection {
 	/**
 	 * Form object fieldset is bound to
 	 *
-	 * @var slicedup_scaffold\extensions\helper\scaffold\Form
+	 * @var sli_scaffold\extensions\helper\scaffold\Form
 	 */
 	protected $_form;
 
@@ -46,7 +46,7 @@ class Fieldset extends \lithium\util\Collection {
 	 * @var array
 	 */
 	protected $_classes = array(
-		'field' => '\slicedup_scaffold\extensions\helper\scaffold\Field'
+		'field' => '\sli_scaffold\extensions\helper\scaffold\Field'
 	);
 
 	/**
@@ -87,10 +87,10 @@ class Fieldset extends \lithium\util\Collection {
 	/**
 	 * Get/Set form context
 	 *
-	 * @param \slicedup_scaffold\extensions\helper\scaffold\Form $form
+	 * @param \sli_scaffold\extensions\helper\scaffold\Form $form
 	 */
 	public function form($form = null) {
-		$formClass = '\slicedup_scaffold\extensions\helper\scaffold\Form';
+		$formClass = '\sli_scaffold\extensions\helper\scaffold\Form';
 		if ($form instanceOf $formClass) {
 			$this->_form = $form;
 		}

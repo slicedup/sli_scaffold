@@ -9,11 +9,12 @@ http://www.slicedup.org/docs/scaffold
 
 **Sources:**
 
-* <https://github.com/websta/slicedup_scaffold/>
+* <https://github.com/Slicedup/sli_scaffold>
 
 **Requires:**
 
-* Lithium: <http://dev.lithify.me/lithium/source>
+* Lithium: <https://github.com/UnionOfRAD/lithium>
+* Slicedup Util: <https://github.com/Slicedup/sli_util>
 
 ##Overview
 
@@ -32,12 +33,12 @@ performing basic CRUD actions.
 
 ##Installation
 
-1. Install as `slicedup_scaffold` to your application `libraries` directory.
+1. Install as `sli_scaffold` to your application `libraries` directory.
 
 2. Add to your application in your bootstrap.
 {{{
 //app/config/bootstrap/libraries.php
-Libraries::add('slicedup_scaffold');
+Libraries::add('sli_scaffold');
 }}}
 
 ##Configuration & Usage
@@ -97,7 +98,7 @@ using scaffolds without a model you have model access via the `Scaffold::model()
 method. Using the above example, this might look like:
 {{{
 namespace app\controlers;
-use slicedup_scaffold\core\Scaffold;
+use sli_scaffold\core\Scaffold;
 class PostsController extends \lithium\action\Controller {
 	public $scaffold; //populated with scaffold config at runtime
 	public function archives(){
@@ -124,10 +125,10 @@ Create them as you would normally in your controller's views directory. For a
 request to scaffold `posts`, the following locations would checked in this order:  
 `{app}/views/posts/`  
 `{app}/views/scaffold/`  
-`{slicedup_scaffold}/views/scaffold/`  
+`{sli_scaffold}/views/scaffold/`  
 
 ####Configuration Options
-Scaffolding is controlled by configuring the `slicedup_scaffold\core\Scaffold`
+Scaffolding is controlled by configuring the `sli_scaffold\core\Scaffold`
 class, and additionally by setting options within your own controllers `scaffold`
 property.
 
@@ -147,7 +148,7 @@ scaffold requests
 #####Configuration Examples
 
 {{{
-use slicedup_scaffold\core\Scaffold;
+use sli_scaffold\core\Scaffold;
 
 //Global
 Scaffold::config(array(

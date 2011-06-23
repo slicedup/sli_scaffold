@@ -6,7 +6,7 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\extensions\helper;
+namespace sli_scaffold\extensions\helper;
 
 use lithium\util\Set;
 use lithium\util\Inflector;
@@ -14,8 +14,8 @@ use lithium\util\Inflector;
 class Scaffold extends \lithium\template\Helper {
 
 	protected $_classes = array(
-		'scaffold' => '\slicedup_scaffold\core\Scaffold',
-		'form' => '\slicedup_scaffold\extensions\helper\scaffold\Form'
+		'scaffold' => '\sli_scaffold\core\Scaffold',
+		'form' => '\sli_scaffold\extensions\helper\scaffold\Form'
 	);
 
 	/**

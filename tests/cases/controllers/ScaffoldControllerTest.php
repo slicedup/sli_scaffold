@@ -6,7 +6,7 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\tests\cases\controllers;
+namespace sli_scaffold\tests\cases\controllers;
 
 class ScaffoldControllerTest extends \lithium\test\Unit {
 

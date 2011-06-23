@@ -6,12 +6,12 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\controllers;
+namespace sli_scaffold\controllers;
 
 use lithium\util\Inflector;
 use lithium\util\String;
-use slicedup_core\action\FlashMessage;
-use slicedup_scaffold\core\Scaffold;
+use slicedup_util\action\FlashMessage;
+use sli_scaffold\core\Scaffold;
 
 class ScaffoldController extends \lithium\action\Controller {
 

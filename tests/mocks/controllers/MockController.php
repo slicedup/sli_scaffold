@@ -6,7 +6,7 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\tests\mocks\controllers;
+namespace sli_scaffold\tests\mocks\controllers;
 
 class MockController extends \lithium\action\Controller {
 

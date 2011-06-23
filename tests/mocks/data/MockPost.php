@@ -6,7 +6,7 @@
  * @license       http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\tests\mocks\data;
+namespace sli_scaffold\tests\mocks\data;
 
 class MockPost extends \lithium\data\Model {
 

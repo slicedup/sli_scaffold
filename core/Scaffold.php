@@ -6,14 +6,14 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-namespace slicedup_scaffold\core;
+namespace sli_scaffold\core;
 
 use lithium\action\Dispatcher;
 use lithium\core\Libraries;
 use lithium\util\Set;
 use lithium\util\Inflector;
-use slicedup_scaffold\extensions\data\Model;
-use slicedup_core\net\http\Media;
+use sli_scaffold\extensions\data\Model;
+use sli_util\net\http\MediaPaths;
 use BadMethodCallException;
 
 class Scaffold extends \lithium\core\StaticObject {
@@ -55,8 +55,8 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @var array
 	 */
 	protected static $_classes = array(
-		'controller' => 'slicedup_scaffold\controllers\ScaffoldController',
-		'model' => 'slicedup_scaffold\models\Scaffolds'
+		'controller' => 'sli_scaffold\controllers\ScaffoldController',
+		'model' => 'sli_scaffold\models\Scaffolds'
 	);
 
 	/**
@@ -278,7 +278,7 @@ class Scaffold extends \lithium\core\StaticObject {
 		if ($name) {
 			$name = static::_name($name, true);
 		}
-		$scaffold = Libraries::get('slicedup_scaffold');
+		$scaffold = Libraries::get('sli_scaffold');
 		$paths = array(
 			'append' => array(
 				'template' => array(
@@ -311,15 +311,15 @@ class Scaffold extends \lithium\core\StaticObject {
 		$filter = function($self, $params, $chain){
 			$name = $params['name'];
 			$paths = $params['paths'];
-			$html = Media::type('html');
+			$html = MediaPaths::type('html');
 			if (empty($html['options']['paths'])) {
-				Media::type('html', $html['content'], $html['options'] + Media::defaultOptions());
+				MediaPaths::type('html', $html['content'], $html['options'] + MediaPaths::defaults());
 			}
 			if (!empty($paths['prepend'])) {
-				Media::addPaths('html', $paths['prepend']);
+				MediaPaths::addPaths('html', $paths['prepend']);
 			}
 			if (!empty($paths['append'])) {
-				Media::addPaths('html', $paths['append'], false);
+				MediaPaths::addPaths('html', $paths['append'], false);
 			}
 		};
 
