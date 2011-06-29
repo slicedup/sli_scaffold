@@ -32,6 +32,11 @@ use BadMethodCallException;
  */
 class Model extends \lithium\data\Model {
 
+	/**
+	 * Form field mappings
+	 *
+	 * @var array
+	 */
 	protected static $_formFieldMappings = array(
 		'default' => array(
 			'__key' => array('method' => 'hidden'),
@@ -53,7 +58,7 @@ class Model extends \lithium\data\Model {
 	 * @see sli_scaffold\core\Scaffold::getFieldset()
 	 * @var array
 	 */
-	public $scaffoldFields;
+	public static $scaffoldFields;
 
 	/**
 	 * Record summary fields
@@ -63,7 +68,7 @@ class Model extends \lithium\data\Model {
 	 * @see sli_scaffold\extensions\data\Model::scaffoldFields
 	 * @var array
 	 */
-	public $summaryFields;
+	public static $summaryFields;
 
 	/**
 	 * Record detail fields
@@ -73,7 +78,7 @@ class Model extends \lithium\data\Model {
 	 * @see sli_scaffold\extensions\data\Model::scaffoldFields
 	 * @var array
 	 */
-	public $detailFields;
+	public static $detailFields;
 
 	/**
 	 * Scaffold form fields
@@ -122,7 +127,7 @@ class Model extends \lithium\data\Model {
 	 *
 	 * @var array
 	 */
-	public $scaffoldFormFields;
+	public static $scaffoldFormFields;
 
 	/**
 	 * Add/create form fields
@@ -133,7 +138,7 @@ class Model extends \lithium\data\Model {
 	 * @see sli_scaffold\extensions\data\Model::scaffoldFormFields
 	 * @var array
 	 */
-	public $createFormFields;
+	public static $createFormFields;
 
 	/**
 	 * Edit/update form fields
@@ -144,7 +149,7 @@ class Model extends \lithium\data\Model {
 	 * @see sli_scaffold\extensions\data\Model::scaffoldFormFields
 	 * @var array
 	 */
-	public $updateFormFields;
+	public static $updateFormFields;
 
 	/**
 	 * Provide scaffold field set getters
@@ -360,7 +365,6 @@ class Model extends \lithium\data\Model {
 		}
 		return $fields;
 	}
-
 }
 
 ?>
