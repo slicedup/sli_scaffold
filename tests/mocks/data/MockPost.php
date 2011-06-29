@@ -10,6 +10,20 @@ namespace sli_scaffold\tests\mocks\data;
 
 class MockPost extends \lithium\data\Model {
 
+	public static $scaffoldFields;
+
+	public static $summaryFields;
+
+	public static $detailFields;
+
+	public static $scaffoldFormFields;
+
+	public static $createFormFields;
+
+	public static $updateFormFields;
+
+	public static $anyOtherFields;
+
 	protected $_schema = array(
 		'id' => array('type' => 'integer'),
 		'author_id' => array('type' => 'integer'),
@@ -18,11 +32,6 @@ class MockPost extends \lithium\data\Model {
 		'created' => array('type' => 'datetime'),
 		'updated' => array('type' => 'datetime')
 	);
-
-	public static function flush() {
-		static::$_instances = array();
-	}
-
 }
 
 ?>

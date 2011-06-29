@@ -16,11 +16,6 @@ class ModelTest extends \lithium\test\Unit {
 
 	protected $_model = 'sli_scaffold\tests\mocks\data\MockPost';
 
-	public function tearDown() {
-		$post = $this->_model;
-		$post::flush();
-	}
-
 	public function testUnsetScaffoldFields() {
 		$post = $this->_model;
 		$schema = $post::schema();
@@ -53,8 +48,7 @@ class ModelTest extends \lithium\test\Unit {
 	public function testScaffoldFields() {
 		$post = $this->_model;
 		$setScaffoldFields = array('id', 'title', 'body', 'status');
-		$instance = $post::invokeMethod('_object');
-		$instance->scaffoldFields = $setScaffoldFields;
+		$post::$scaffoldFields = $setScaffoldFields;
 
 		$fields = Model::getFields($post);
 		$expected = $setScaffoldFields;
@@ -67,7 +61,7 @@ class ModelTest extends \lithium\test\Unit {
 		$this->assertEqual($fields, $summaryFields);
 
 		$setSummaryFields = array('id', 'title', 'status', 'created');
-		$instance->summaryFields = $setSummaryFields;
+		$post::$summaryFields = $setSummaryFields;
 		$summaryFields = Model::getSummaryFields($post);
 		$this->assertEqual($setSummaryFields, array_keys($summaryFields));
 		$summaryFields = Model::getFields($post, 'summary');
@@ -79,7 +73,7 @@ class ModelTest extends \lithium\test\Unit {
 		$this->assertEqual($fields, $detailFields);
 
 		$setDetailFields = array('id', 'title', 'status', 'created');
-		$instance->detailFields = $setDetailFields;
+		$post::$detailFields = $setDetailFields;
 		$detailFields = Model::getDetailFields($post);
 		$this->assertEqual($setDetailFields, array_keys($detailFields));
 		$detailFields = Model::getFields($post, 'detail');
@@ -91,7 +85,7 @@ class ModelTest extends \lithium\test\Unit {
 		$this->assertEqual($fields, $anyOtherFields);
 
 		$setAnyOtherFields = array('id', 'created', 'modified');
-		$instance->anyOtherFields = $setAnyOtherFields;
+		$post::$anyOtherFields = $setAnyOtherFields;
 		$anyOtherFields = Model::getAnyOtherFields($post);
 		$this->assertEqual($setAnyOtherFields, array_keys($anyOtherFields));
 		$anyOtherFields = Model::getFields($post, 'anyOther');

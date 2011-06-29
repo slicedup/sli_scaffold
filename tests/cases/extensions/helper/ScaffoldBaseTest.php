@@ -54,6 +54,7 @@ class ScaffoldBaseTest extends \lithium\test\Unit {
 		foreach ($this->_routes as $route) {
 			Router::connect($route);
 		}
+		unset($this->_routes, $this->context, $this->helper);
 	}
 }
 

@@ -8,10 +8,6 @@
 
 namespace sli_scaffold\tests\cases\extensions\helper\scaffold;
 
-use lithium\test;
-
-use sli_scaffold\extensions\helper\scaffold;
-
 use sli_scaffold\extensions\helper\scaffold\Form;
 
 class FormTest extends \sli_scaffold\tests\cases\extensions\helper\ScaffoldBaseTest {
@@ -33,13 +29,12 @@ class FormTest extends \sli_scaffold\tests\cases\extensions\helper\ScaffoldBaseT
 				'method' => 'post',
 			),
 			'fieldset' => array(),
-			'input' => array('type' => 'hidden', 'name' => 'id'),
+			array('input' => array('type' => 'hidden', 'name' => 'id', 'id' => 'Id')),
 			'div' => array(),
 			'label' => array('for' => 'Name'),
 			'Name',
-			'/label',
+			'/label'
 		));
-
 	}
 }
 
