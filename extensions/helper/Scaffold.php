@@ -29,8 +29,12 @@ class Scaffold extends \lithium\template\Helper {
 		$formClass = $this->_classes['form'];
 		if ($form instanceOf $formClass) {
 			$formInstance = $form;
-			$formInstance->config($options);
-			$formInstance->binding($binding);
+			if ($options) {
+				$formInstance->config($options);
+			}
+			if ($binding) {
+				$formInstance->binding($binding);
+			}
 		} else {
 			$formInstance = $this->formInstance($form, $binding, $options);
 		}
