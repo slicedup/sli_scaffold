@@ -1,0 +1,6 @@
+Version=0.2-dev
+Date=TBC
+Source=http://www.github.com/Slicedup/sli_scaffold
+Docs=TBC
+Api=TBC
+Authors[]=Paul Webster
