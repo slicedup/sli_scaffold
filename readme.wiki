@@ -5,7 +5,7 @@ http://www.slicedup.org/docs/scaffold
 
 **Version:** 
 
-* master - development
+* 0.2 (alpha)
 
 **Sources:**
 
