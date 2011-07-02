@@ -39,7 +39,7 @@ class Model extends \lithium\data\Model {
 	 */
 	protected static $_formFieldMappings = array(
 		'default' => array(
-			'__key' => array('method' => 'hidden'),
+			'__key' => array('type' => 'hidden'),
 			'text' => array('type' => 'textarea'),
 			'boolean' => array('type' => 'checkbox')
 		)
