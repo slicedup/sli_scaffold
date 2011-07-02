@@ -15,7 +15,7 @@ http://www.slicedup.org/docs/scaffold
 
 * Lithium: <https://github.com/UnionOfRAD/lithium>
 * Slicedup Utilities: <https://github.com/Slicedup/sli_util>
-* Slicedup Document Object Mapper: <https://github.com/Slicedup/sli_dom>
+* Slicedup Template Object Mapper: <https://github.com/Slicedup/sli_tom>
 
 ##Overview
 

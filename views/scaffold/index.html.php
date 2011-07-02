@@ -23,7 +23,7 @@ $this->title($t($plural));
 				<td><?php echo $h($record->{$field});?></td>
 				<?php endforeach;?>
 				<td class="actions">
-					<?php 
+					<?php
 						$_actions = array('view', 'edit', 'delete');
 						foreach ($_actions as $action):
 							if(in_array($action, $actions)):

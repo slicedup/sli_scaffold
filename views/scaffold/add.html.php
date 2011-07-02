@@ -12,7 +12,10 @@ $this->title($t($plural));
 	<h2><?php echo $t('{:action} {:entity}', array('action' => $t('Add'), 'entity' => $t($singular)));?></h2>
 	<div class="edit <?php echo $singular;?>">
 		<?php
-			echo $this->scaffold->form($fields, $record);
+			echo $this->elements->create('scaffold\Form', array(
+				'fieldsets' => $fields,
+				'binding' => $record
+			), true);
 		?>
 	</div>
 	<ul class="actions">
