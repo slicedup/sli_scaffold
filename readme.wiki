@@ -1,11 +1,5 @@
-Slicedup Scaffold
-=================
-
-http://www.slicedup.org/docs/scaffold
-
-**Version:** 
-
-* 0.3 (development)
+#Slicedup Scaffold
+__Version__: 0.3 (development)
 
 **Sources:**
 
