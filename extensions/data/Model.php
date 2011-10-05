@@ -274,7 +274,7 @@ class Model extends \lithium\data\Model {
 			if (empty($fields)) {
 				$fields[] = array(
 					'legend' => null,
-					'fields' => $self::invokeMethod('_mapSchemaFields', array($model, $mapping))
+					'fields' => $self::invokeMethod('mapSchemaFields', array($model, $mapping))
 				);
 			} else {
 				$first = reset($fields);
@@ -325,7 +325,7 @@ class Model extends \lithium\data\Model {
 			$mapping = static::getFieldMapping($mapping);
 		}
 		if (!$fieldset) {
-			return static::_mapSchemaFields($model, $mapping);
+			return static::mapSchemaFields($model, $mapping);
 		}
 		$schema = $model::schema();
 		$key = $model::meta('key');
@@ -347,7 +347,7 @@ class Model extends \lithium\data\Model {
 		return $fields;
 	}
 
-	protected static function _mapSchemaFields($model, $mapping = null) {
+	public static function mapSchemaFields($model, $mapping = null) {
 		if (!is_array($mapping)) {
 			$mapping = static::getFieldMapping($mapping);
 		}
