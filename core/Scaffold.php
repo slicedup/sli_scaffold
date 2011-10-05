@@ -190,6 +190,9 @@ class Scaffold extends \lithium\core\StaticObject {
 	 */
 	public static function invoke($controller, array $params = array(), array $options = array()) {
 		if ($callable = static::callable($controller, $params, $options)) {
+			if (method_exists($controller, '_scaffold')) {
+				$controller->invokeMethod('_scaffold', array($callable, $params, $options));
+			}
 			return static::call($callable, $params);
 		}
 	}
