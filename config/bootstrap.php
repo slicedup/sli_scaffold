@@ -11,11 +11,12 @@ use lithium\action\Dispatcher;
 use sli_scaffold\core\Scaffold;
 
 /**
- * Dispatch filter to cathc scaffold requests
+ * Dispatch filter to handle scaffold requests
  */
 Dispatcher::applyFilter('_callable', function($self, $params, $chain) {
 	$scaffoldName = Scaffold::name($params['params']);
 	$controller = $params['params']['controller'];
+
 	if(!Libraries::locate('controllers', $controller)) {
 		if ($controller = Scaffold::controller($scaffoldName)) {
 			$params['params']['controller'] = $controller;
