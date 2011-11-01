@@ -241,10 +241,9 @@ class Scaffold extends \lithium\core\StaticObject {
 			return;
 		}
 
-		if (property_exists($controller, 'scaffold')) {
-			$name = static::_name($name);
+		$name = static::_name($name);
+		if (property_exists($controller, 'scaffold') && ($config = static::get($name)) !== false) {
 			//merge Controller::scaffold with config
-			$config = static::get($name);
 			$config = (array) $controller->scaffold + $config;
 			$config['controller'] = get_class($controller);
 			//update Controller::scaffold
