@@ -13,7 +13,7 @@ use lithium\core\Libraries;
 use lithium\util\Set;
 use lithium\util\Inflector;
 use sli_scaffold\extensions\data\Model;
-use sli_util\net\http\MediaPaths;
+use sli_base\net\http\Media;
 use BadMethodCallException;
 
 class Scaffold extends \lithium\core\StaticObject {
@@ -313,15 +313,15 @@ class Scaffold extends \lithium\core\StaticObject {
 		$filter = function($self, $params, $chain){
 			$name = $params['name'];
 			$paths = $params['paths'];
-			$html = MediaPaths::type('html');
+			$html = Media::type('html');
 			if (empty($html['options']['paths'])) {
-				MediaPaths::type('html', $html['content'], $html['options'] + MediaPaths::defaults());
+				Media::type('html', $html['content'], $html['options'] + Media::defaults());
 			}
 			if (!empty($paths['prepend'])) {
-				MediaPaths::addPaths('html', $paths['prepend']);
+				Media::addPaths('html', $paths['prepend']);
 			}
 			if (!empty($paths['append'])) {
-				MediaPaths::addPaths('html', $paths['append'], false);
+				Media::addPaths('html', $paths['append'], false);
 			}
 		};
 

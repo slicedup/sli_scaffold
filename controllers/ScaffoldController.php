@@ -10,7 +10,7 @@ namespace sli_scaffold\controllers;
 
 use lithium\util\Inflector;
 use lithium\util\String;
-use sli_util\action\FlashMessage;
+use sli_base\action\FlashMessage;
 use sli_scaffold\core\Scaffold;
 
 class ScaffoldController extends \lithium\action\Controller {
