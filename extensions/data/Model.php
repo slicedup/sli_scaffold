@@ -347,11 +347,11 @@ class Model extends \lithium\data\Model {
 		return $fields;
 	}
 
-	public static function mapSchemaFields($model, $mapping = null) {
+	public static function mapSchemaFields($model, $mapping = null, $schema = null) {
 		if (!is_array($mapping)) {
 			$mapping = static::getFieldMapping($mapping);
 		}
-		$schema = $model::schema();
+		$schema = $schema ?: $model::schema();
 		$key = $model::meta('key');
 		$fields = array();
 		foreach ($schema as $field => $settings) {
