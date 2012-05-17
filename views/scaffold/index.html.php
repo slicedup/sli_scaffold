@@ -7,9 +7,9 @@
  */
 $this->title($t($plural));
 ?>
-<div class="<?php echo $plural;?>">
+<div class="scaffold <?php echo $plural;?> index<?php echo $singular;?>">
 	<h2><?php echo $t($plural);?></h2>
-	<div class="index">
+	<div class="summary">
 		<table>
 			<tr>
 			<?php foreach ($fields as $field => $name):?>

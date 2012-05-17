@@ -8,9 +8,9 @@
 
 $this->title($t($plural));
 ?>
-<div class="<?php echo $plural;?>">
+<div class="scaffold <?php echo $plural;?> add<?php echo $singular;?>">
 	<h2><?php echo $t('{:action} {:entity}', array('action' => $t('Add'), 'entity' => $t($singular)));?></h2>
-	<div class="edit <?php echo $singular;?>">
+	<div class="form create">
 		<?php
 			echo $this->elements->create('scaffold\Form', array(
 				'fieldsets' => $fields,

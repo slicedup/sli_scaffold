@@ -8,9 +8,9 @@
 
 $this->title($t($plural));
 ?>
-<div class="<?php echo $plural;?>">
+<div class="scaffold <?php echo $plural;?> view<?php echo $singular;?>">
 	<h2><?php echo $t('{:action} {:entity}', array('action' => $t('View'), 'entity' => $t($singular)));?></h2>
-	<div class="view <?php echo $singular;?>">
+	<div class="details">
 		<dl>
 		<?php foreach ($fields as $field => $name):?>
 			<dt><?php echo $t($name)?></dt>
