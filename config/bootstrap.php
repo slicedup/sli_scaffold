@@ -16,7 +16,7 @@ use lithium\util\String;
  * Dispatch filter to patch the call to translate in scaffold templates that
  * are g11n enabled, when g11n hanlders are not set
  */
-Dispatcher::applyFilter('_callable', function($self, $params, $chain) {
+Dispatcher::applyFilter('run', function($self, $params, $chain) {
 	Media::applyFilter('_handle', function($self, $params, $chain) {
 		$t = function($message, $options = array()){
 			if (!empty($options)) {
