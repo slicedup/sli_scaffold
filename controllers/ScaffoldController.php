@@ -70,12 +70,12 @@ class ScaffoldController extends \lithium\action\Controller {
 
 	public function add() {
 		$vars = $this->_scaffoldVars();
-		$fields = Scaffold::getCreateFormFields($vars['model']);
+		$fieldsets = Scaffold::getCreateFormFields($vars['model']);
 		$messages = array(
 			'error' => '{:singular} could not be created.',
 			'success' => '{:singular} created.'
 		);
-		$params = $vars + compact('fields', 'messages');
+		$params = $vars + compact('fieldsets', 'messages');
 
 		$filter = function($self, $params){
 			$model = $params['model'];
@@ -102,13 +102,13 @@ class ScaffoldController extends \lithium\action\Controller {
 
 	public function edit() {
 		$vars = $this->_scaffoldVars();
-		$fields = Scaffold::getUpdateFormFields($vars['model']);
+		$fieldsets = Scaffold::getUpdateFormFields($vars['model']);
 		$messages = array(
 			'notfound' => '{:singular} not found.',
 			'error' => '{:singular} could not be updated.',
 			'success' => '{:singular} updated.'
 		);
-		$params = $vars + compact('fields', 'messages');
+		$params = $vars + compact('fieldsets', 'messages');
 
 		$filter = function($self, $params){
 			$model = $params['model'];

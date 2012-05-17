@@ -12,10 +12,10 @@ $this->title($t($plural));
 	<h2><?php echo $t('{:action} {:entity}', array('action' => $t('Add'), 'entity' => $t($singular)));?></h2>
 	<div class="form create">
 		<?php
-			echo $this->elements->create('scaffold\Form', array(
-				'fieldsets' => $fields,
-				'binding' => $record
-			), true);
+			echo $this->ScaffoldForm->create($record, compact('url'));
+			echo $this->ScaffoldForm->fieldsets($fieldsets);
+			echo $this->ScaffoldForm->field('Create', array('type' => 'submit', 'label' => false));
+			echo $this->ScaffoldForm->end();
 		?>
 	</div>
 	<ul class="actions">
