@@ -208,6 +208,8 @@ class ScaffoldController extends \lithium\action\Controller {
 			'plural' => Inflector::pluralize($name),
 			'singular' => Inflector::singularize($name),
 			'actions' => Scaffold::handledAction($name),
+			'action' => $this->request->params['action'],
+			'url' => $this->request->url,
 			'redirect' => array('action' => 'index')
 		);
 		$this->set($vars);
