@@ -13,7 +13,7 @@ use lithium\action\DispatchException;
 use lithium\core\Libraries;
 use lithium\util\Set;
 use lithium\util\Inflector;
-use sli_scaffold\extensions\data\Model;
+use sli_scaffold\models\Scaffolds as Model;
 use sli_base\net\http\Media;
 use BadMethodCallException;
 
@@ -283,6 +283,30 @@ class Scaffold extends \lithium\core\StaticObject {
 			return $scaffold::invoke($self, $dispatchParams, $options);
 		});	
 	}
+	
+	/**
+	 * Checks is an action is provided in the Scaffold config
+	 *
+	 * @todo integrate per config checking
+	 *
+	 * @param string $name
+	 * @param string $action
+	 */
+	public static function handledAction($name, $action = null, $prefix = null) {
+		if (!$config = static::get($name)) {
+			return false;
+		}
+		$actions = isset($config['actions']) ? (array) $config['actions'] : static::$_config['actions'];
+		if (!isset($action)) {
+			return $actions;
+		}
+		if ($prefix) {
+			if (isset($actions[$action])) {
+				return in_array($prefix, $actions[$action]);
+			}
+		}
+		return in_array($action, $actions);
+	}
 
 	/**
 	 * Set media paths to allow universal scaffold template usage
@@ -368,30 +392,6 @@ class Scaffold extends \lithium\core\StaticObject {
 			$controller = static::$_classes['controller'];
 		}
 		return $controller;
-	}
-
-	/**
-	 * Checks is an action is provided in the Scaffold config
-	 *
-	 * @todo integrate per config checking
-	 *
-	 * @param string $name
-	 * @param string $action
-	 */
-	public static function handledAction($name, $action = null, $prefix = null) {
-		if (!$config = static::get($name)) {
-			return false;
-		}
-		$actions = isset($config['actions']) ? (array) $config['actions'] : static::$_config['actions'];
-		if (!isset($action)) {
-			return $actions;
-		}
-		if ($prefix) {
-			if (isset($actions[$action])) {
-				return in_array($prefix, $actions[$action]);
-			}
-		}
-		return in_array($action, $actions);
 	}
 
 	/**
