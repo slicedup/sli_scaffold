@@ -9,6 +9,7 @@
 namespace sli_scaffold\core;
 
 use lithium\action\Dispatcher;
+use lithium\action\DispatchException;
 use lithium\core\Libraries;
 use lithium\util\Set;
 use lithium\util\Inflector;
@@ -251,7 +252,11 @@ class Scaffold extends \lithium\core\StaticObject {
 		if (method_exists($controller, $action) && static::$_classes['controller'] != get_class($controller)) {
 			return;
 		}
-		$prefixes = isset($config['prefixes']) ? $config['prefixes'] : static::$_config['prefixes'];
+		
+		$prefixes = static::$_config['prefixes'];
+		if (isset($config['prefixes'])) {
+			$prefixes = $config['prefixes'];
+		}
 		$prefix = false;
 		if ($prefixes) {
 			foreach ($prefixes as $name => $pre) {
@@ -261,18 +266,22 @@ class Scaffold extends \lithium\core\StaticObject {
 					break;
 				}
 			}
-		}
-		if ($prefix || (!$prefix && isset($prefixes['default']) && empty($prefixes['default']))) {
-			if (static::handledAction($name, $action, $prefix ?: 'default')) {
-				$scaffold = get_called_class();
-				$controller->applyFilter('__invoke', function($self, $params, $chain) use($scaffold, $action){
-					$dispatchParams = $params['dispatchParams'];
-					$dispatchParams = compact('action') + ($dispatchParams ?: array());
-					$options = $params['options'];
-					return $scaffold::invoke($self, $dispatchParams, $options);
-				});
+			if (!$prefix && in_array('', $prefixes)) {
+				$prefix = array_search('', $prefixes);
 			}
 		}
+		
+		if (!$prefix || !static::handledAction($name, $action, $prefix)) {
+			throw new DispatchException("Action `{$prefix}{$action}` not scaffolded.");
+		}
+		
+		$scaffold = get_called_class();
+		$controller->applyFilter('__invoke', function($self, $params, $chain) use($scaffold, $action){
+			$dispatchParams = $params['dispatchParams'];
+			$dispatchParams = compact('action') + ($dispatchParams ?: array());
+			$options = $params['options'];
+			return $scaffold::invoke($self, $dispatchParams, $options);
+		});	
 	}
 
 	/**
