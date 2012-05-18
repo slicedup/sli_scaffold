@@ -23,7 +23,7 @@ class ScaffoldController extends \lithium\action\Controller {
     }
 
 	public function index() {
-		$vars = $this->_scaffoldVars();
+		$vars = static::scaffoldVars($this);
 		$fields = Scaffold::getSummaryFields($vars['model']);
 		$params = $vars + compact('fields');
 
@@ -41,7 +41,7 @@ class ScaffoldController extends \lithium\action\Controller {
 	}
 
 	public function view() {
-		$vars = $this->_scaffoldVars();
+		$vars = static::scaffoldVars($this);
 		$fields = Scaffold::getDetailFields($vars['model']);
 		$messages = array(
 			'notfound' => '{:singular} not found.'
@@ -69,7 +69,7 @@ class ScaffoldController extends \lithium\action\Controller {
 	}
 
 	public function add() {
-		$vars = $this->_scaffoldVars();
+		$vars = static::scaffoldVars($this);
 		$fieldsets = Scaffold::getCreateFormFields($vars['model']);
 		$messages = array(
 			'error' => '{:singular} could not be created.',
@@ -101,7 +101,7 @@ class ScaffoldController extends \lithium\action\Controller {
 	}
 
 	public function edit() {
-		$vars = $this->_scaffoldVars();
+		$vars = static::scaffoldVars($this);
 		$fieldsets = Scaffold::getUpdateFormFields($vars['model']);
 		$messages = array(
 			'notfound' => '{:singular} not found.',
@@ -139,7 +139,7 @@ class ScaffoldController extends \lithium\action\Controller {
 	}
 
 	public function delete() {
-		$vars = $this->_scaffoldVars();
+		$vars = static::scaffoldVars($this);
 		$messages = array(
 			'notfound' => '{:singular} not found.',
 			'error' => '{:singular} could not be deleted.',
@@ -168,7 +168,7 @@ class ScaffoldController extends \lithium\action\Controller {
 	}
 
 	public function display() {
-		$vars = $this->_scaffoldVars();
+		$vars = static::scaffoldVars($this);
 		$path = func_get_args() ?: array('display');
 		$params = $vars + compact('path');
 
@@ -182,37 +182,49 @@ class ScaffoldController extends \lithium\action\Controller {
 		return $this->_filter(__METHOD__, $params, $filter);
 	}
 
-	public function flash($key, $messageKey, $messages, $data = array()) {
+	/**
+	 * Invoke a scaffolded action
+	 * 
+	 * @todo
+	 */
+	public static function scaffoldAction(&$controller){}
+	
+	/**
+	 * Format a  default scaffold flash message by insetring defined data and
+	 * passing the the flash message class
+	 */
+	public static function flash($key, $messageKey, $messages, $data = array()) {
 		if (!empty($messages[$messageKey])) {
-			$flash = array($messages[$messageKey], $data);
-			$message = $this->invokeMethod('_formatFlash', $flash);
-			return FlashMessage::invokeMethod($key, $message);
+			$message = $messages[$messageKey];
+			if (is_array($message)) {
+				$message = array($message);
+			}
+			if ($string = array_shift($message)) {
+				$string = String::insert($string, $data);
+				array_unshift($message, $string);
+				return FlashMessage::invokeMethod($key, $message);
+			}	
 		}
 	}
 
-	protected function _formatFlash($message, $vars) {
-		if (!is_array($message)) {
-			$message = array($message);
-		}
-		if ($string = array_shift($message)) {
-			$string = String::insert($string, $vars);
-			array_unshift($message, $string);
-			return $message;
-		}
-	}
-
-	protected function _scaffoldVars () {
-		$name = Inflector::humanize($this->scaffold['name']);
+	/**
+	 * Create & set the default view vars for a scaffolded controller
+	 * @param unknown_type $controller
+	 */
+	public static function scaffoldVars(&$controller, $set = true) {
+		$name = Inflector::humanize($controller->scaffold['name']);
 		$vars = array(
-			'model' => Scaffold::model($this->scaffold['name']),
+			'model' => Scaffold::model($controller->scaffold['name']),
 			'plural' => Inflector::pluralize($name),
 			'singular' => Inflector::singularize($name),
 			'actions' => Scaffold::handledAction($name),
-			'action' => $this->request->params['action'],
-			'url' => $this->request->url,
+			'action' => $controller->request->params['action'],
+			'url' => $controller->request->url,
 			'redirect' => array('action' => 'index')
 		);
-		$this->set($vars);
+		if ($set) {
+			$controller->set($vars);
+		}
 		return $vars;
 	}
 }
