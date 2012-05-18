@@ -25,7 +25,10 @@ class Scaffold extends \lithium\core\StaticObject {
 	 */
 	protected static $_config = array(
 		'all' => true,
-		'paths' => true
+		'paths' => true,
+		'prefixes' => array(
+			'default' => ''
+		)
 	);
 
 	/**
@@ -240,7 +243,6 @@ class Scaffold extends \lithium\core\StaticObject {
 			$controller->scaffold = $params['options']['scaffold'];
 			return;
 		}
-
 		$name = static::_name($name);
 		if (property_exists($controller, 'scaffold') && ($config = static::get($name)) !== false) {
 			//merge Controller::scaffold with config
@@ -257,14 +259,31 @@ class Scaffold extends \lithium\core\StaticObject {
 			//Check action for current controller, invoke scaffold controller
 			//for undeclared actions when action is envoked
 			$action = $params['params']['action'];
-			if (!method_exists($controller, $action) && static::handledAction($name, $action)) {
-				$scaffold = get_called_class();
-				$controller->applyFilter('__invoke', function($self, $params, $chain) use($scaffold){
-					$dispatchParams = $params['dispatchParams'];
-					$dispatchParams = $dispatchParams ?: array();
-					$options = $params['options'];
-					return $scaffold::invoke($self, $dispatchParams, $options);
-				});
+			
+			if (!method_exists($controller, $action)) {
+				$prefixes = isset($config['prefixes']) ? $config['prefixes'] : static::$_config['prefixes'];
+				$prefix = false;
+				if ($prefixes) {
+					foreach ($prefixes as $name => $pre) {
+						if ($pre && strpos($action, $pre) === 0) {
+							$action = str_replace($pre, '', $action);
+							$prefix = $name;
+							break;
+						}
+					}
+				}
+				if ($prefix || (!$prefix && isset($prefixes['default']) && empty($prefixes['default']))) {
+					if (static::handledAction($name, $action, $prefix)) {
+						$scaffold = get_called_class();
+						$controller->applyFilter('__invoke', function($self, $params, $chain) use($scaffold, $action){
+							$dispatchParams = $params['dispatchParams'];
+							$dispatchParams = compact('action') + ($dispatchParams ?: array());
+							$options = $params['options'];
+							return $scaffold::invoke($self, $dispatchParams, $options);
+						});
+					}
+				}
+				
 			}
 		}
 	}
@@ -364,13 +383,18 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param string $name
 	 * @param string $action
 	 */
-	public static function handledAction($name, $action = null) {
+	public static function handledAction($name, $action = null, $prefix = null) {
 		if (!$config = static::get($name)) {
 			return false;
 		}
 		$actions = isset($config['actions']) ? (array) $config['actions'] : static::$_actions;
 		if (!isset($action)) {
 			return $actions;
+		}
+		if ($prefix) {
+			if (isset($actions[$action])) {
+				return in_array($prefix, $actions[$action]);
+			}
 		}
 		return in_array($action, $actions);
 	}
