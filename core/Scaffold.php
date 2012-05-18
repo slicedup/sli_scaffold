@@ -161,7 +161,7 @@ class Scaffold extends \lithium\core\StaticObject {
 		} else {
 			$name = $params['controller'];
 			if (!empty($params['library'])) {
-				$name = $params['library'] . '\\' . $name;
+				$name = $params['library'] . '.' . $name;
 			}
 		}
 		return static::_name($name);
@@ -174,15 +174,15 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @return string mixed
 	 */
 	protected static function _name($name, $full = false) {
-		$library = 'app\\';
-		if ($lib = strpos($name, '\\')) {
+		$library = 'app';
+		if ($lib = strpos($name, '.')) {
 			$library = substr($name, 0, $lib + 1);
 			$name = substr($name, $lib + 1);
 		}
 		$name = Inflector::underscore($name);
 		$name = trim(preg_replace('/_?controller(s)?/', '', $name), ' _');
-		if ($library != 'app\\' || $full) {
-			$name = $library . $name;
+		if ($library != 'app' || $full) {
+			$name = "{$library}.{$name}";
 		}
 		return $name;
 	}
@@ -315,9 +315,8 @@ class Scaffold extends \lithium\core\StaticObject {
 		);
 
 		if ($name) {
-			list($library, $_name) = explode('\\', $name);
+			list($library, $_name) = explode('.', $name);
 			$library = Libraries::get($library);
-			$libPath = '{:library}';
 			$paths['prepend']['template'] = array(
 				$library['path'] . '/views/'.$_name.'/{:template}.{:type}.php',
 				$library['path'] . '/views/{:controller}/{:template}.{:type}.php'
