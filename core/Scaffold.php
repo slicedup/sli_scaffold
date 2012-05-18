@@ -37,7 +37,8 @@ class Scaffold extends \lithium\core\StaticObject {
 			'edit',
 			'delete',
 			'display'
-		)
+		),
+		'connection' => 'default'
 	);
 
 	/**
@@ -421,8 +422,8 @@ class Scaffold extends \lithium\core\StaticObject {
 		}
 		if (!$model && $default) {
 			$model = static::$_classes['model'];
-			$connection = 'default';
-			if (isset($config['connection'])) {
+			$connection = static::$_config['connection'];
+			if (is_array($config) && array_key_exists('connection', $config)) {
 				$connection = $config['connection'];
 			}
 			$model::meta(array(
