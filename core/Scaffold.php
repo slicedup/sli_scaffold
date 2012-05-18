@@ -28,21 +28,15 @@ class Scaffold extends \lithium\core\StaticObject {
 		'paths' => true,
 		'prefixes' => array(
 			'default' => ''
+		),
+		'actions' => array(
+			'index',
+			'view',
+			'add',
+			'edit',
+			'delete',
+			'display'
 		)
-	);
-
-	/**
-	 * Scaffolded actions
-	 *
-	 * @var array
-	 */
-	protected static $_actions = array(
-		'index',
-		'view',
-		'add',
-		'edit',
-		'delete',
-		'display'
 	);
 
 	/**
@@ -386,7 +380,7 @@ class Scaffold extends \lithium\core\StaticObject {
 		if (!$config = static::get($name)) {
 			return false;
 		}
-		$actions = isset($config['actions']) ? (array) $config['actions'] : static::$_actions;
+		$actions = isset($config['actions']) ? (array) $config['actions'] : static::$_config['actions'];
 		if (!isset($action)) {
 			return $actions;
 		}
