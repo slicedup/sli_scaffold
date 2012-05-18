@@ -231,53 +231,46 @@ class Scaffold extends \lithium\core\StaticObject {
 	 */
 	public static function prepare($name, &$controller, $params){
 		if (!empty($params['options']['scaffold'])) {
-			//Controllers invoked by Scaffold::invokeScaffoldAction always pass
-			//the scaffold config as an option, in those cases all the
-			//neccesary config has been done
 			$controller->scaffold = $params['options']['scaffold'];
 			return;
 		}
 		$name = static::_name($name);
-		if (property_exists($controller, 'scaffold') && ($config = static::get($name)) !== false) {
-			//merge Controller::scaffold with config
-			$config = (array) $controller->scaffold + $config;
-			$config['controller'] = get_class($controller);
-			//update Controller::scaffold
-			$controller->scaffold = compact('name') + $config;
-			//update stored config
-			static::set($name, $config);
-			//set paths
-			if ((isset($config['paths']) && $config['paths']) || static::$_config['paths']) {
-				static::paths($name);
+		if (!property_exists($controller, 'scaffold') || ($config = static::get($name)) === false) {
+			return;
+		}
+
+		$config = (array) $controller->scaffold + $config;
+		$config['controller'] = get_class($controller);
+		$controller->scaffold = compact('name') + $config;
+		static::set($name, $config);
+		if ((isset($config['paths']) && $config['paths']) || static::$_config['paths']) {
+			static::paths($name);
+		}
+		
+		$action = $params['params']['action'];
+		if (method_exists($controller, $action) && static::$_classes['controller'] != get_class($controller)) {
+			return;
+		}
+		$prefixes = isset($config['prefixes']) ? $config['prefixes'] : static::$_config['prefixes'];
+		$prefix = false;
+		if ($prefixes) {
+			foreach ($prefixes as $name => $pre) {
+				if ($pre && strpos($action, $pre) === 0) {
+					$action = str_replace($pre, '', $action);
+					$prefix = $name;
+					break;
+				}
 			}
-			//Check action for current controller, invoke scaffold controller
-			//for undeclared actions when action is envoked
-			$action = $params['params']['action'];
-			
-			if (!method_exists($controller, $action)) {
-				$prefixes = isset($config['prefixes']) ? $config['prefixes'] : static::$_config['prefixes'];
-				$prefix = false;
-				if ($prefixes) {
-					foreach ($prefixes as $name => $pre) {
-						if ($pre && strpos($action, $pre) === 0) {
-							$action = str_replace($pre, '', $action);
-							$prefix = $name;
-							break;
-						}
-					}
-				}
-				if ($prefix || (!$prefix && isset($prefixes['default']) && empty($prefixes['default']))) {
-					if (static::handledAction($name, $action, $prefix)) {
-						$scaffold = get_called_class();
-						$controller->applyFilter('__invoke', function($self, $params, $chain) use($scaffold, $action){
-							$dispatchParams = $params['dispatchParams'];
-							$dispatchParams = compact('action') + ($dispatchParams ?: array());
-							$options = $params['options'];
-							return $scaffold::invoke($self, $dispatchParams, $options);
-						});
-					}
-				}
-				
+		}
+		if ($prefix || (!$prefix && isset($prefixes['default']) && empty($prefixes['default']))) {
+			if (static::handledAction($name, $action, $prefix ?: 'default')) {
+				$scaffold = get_called_class();
+				$controller->applyFilter('__invoke', function($self, $params, $chain) use($scaffold, $action){
+					$dispatchParams = $params['dispatchParams'];
+					$dispatchParams = compact('action') + ($dispatchParams ?: array());
+					$options = $params['options'];
+					return $scaffold::invoke($self, $dispatchParams, $options);
+				});
 			}
 		}
 	}
