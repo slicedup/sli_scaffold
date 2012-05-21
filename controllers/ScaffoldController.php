@@ -109,7 +109,7 @@ class ScaffoldController extends \lithium\action\Controller {
 	 * Get scaffold action definitions
 	 */
 	protected static function _actions() {
-		$actions = array(
+		return array(
 			'index' => function(&$controller, $action, $vars, $flash) {
 				$fields = Scaffold::getSummaryFields($vars['model']);
 				$params = $vars + compact('fields');
