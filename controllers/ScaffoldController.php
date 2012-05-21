@@ -94,7 +94,7 @@ class ScaffoldController extends \lithium\action\Controller {
 			'model' => Scaffold::model($controller->scaffold['name']),
 			'plural' => Inflector::pluralize($name),
 			'singular' => Inflector::singularize($name),
-			'actions' => Scaffold::handledAction($name),
+			'actions' => Scaffold::handledAction($name, null, $controller->scaffold['prefix']),
 			'action' => $controller->request->params['action'],
 			'url' => $controller->request->url,
 			'redirect' => array('action' => 'index')
