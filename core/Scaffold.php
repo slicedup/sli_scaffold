@@ -250,24 +250,18 @@ class Scaffold extends \lithium\core\StaticObject {
 			static::paths($name);
 		}
 		
-		$action = $params['params']['action'];
-		if (method_exists($controller, $action) && static::$_classes['controller'] != get_class($controller)) {
-			if (method_exists($controller, '_scaffold')) {
-				$controller->invokeMethod('_scaffold', array($controller, $params['params'], $params['options']));
-			}
-			return;
-		}
-		
 		$prefixes = static::$_config['prefixes'];
 		if (isset($config['prefixes'])) {
 			$prefixes = $config['prefixes'];
 		}
+		
+		$action = $_action = $params['params']['action'];
 		$prefix = false;
 		if ($prefixes) {
-			foreach ($prefixes as $name => $pre) {
+			foreach ($prefixes as $key => $pre) {
 				if ($pre && strpos($action, $pre) === 0) {
 					$action = str_replace($pre, '', $action);
-					$prefix = $name;
+					$prefix = $key;
 					break;
 				}
 			}
@@ -275,8 +269,17 @@ class Scaffold extends \lithium\core\StaticObject {
 				$prefix = array_search('', $prefixes);
 			}
 		}
+		$controller->scaffold['prefix'] = $prefix;
+		
+		if (method_exists($controller, $_action) && static::$_classes['controller'] != get_class($controller)) {
+			if (method_exists($controller, '_scaffold')) {
+				$controller->invokeMethod('_scaffold', array($controller, $params['params'], $params['options']));
+			}
+			return;
+		}
 		
 		if (!$prefix || !static::handledAction($name, $action, $prefix)) {
+			$prefix = $prefixes[$prefix];
 			throw new DispatchException("Action `{$prefix}{$action}` not scaffolded.");
 		}
 		
@@ -303,14 +306,23 @@ class Scaffold extends \lithium\core\StaticObject {
 		}
 		$actions = isset($config['actions']) ? (array) $config['actions'] : static::$_config['actions'];
 		if (!isset($action)) {
-			return $actions;
+			return array_filter(array_map(function($action, $key) use($prefix){
+				if (is_array($action)) {
+					if (!isset($prefix) || in_array($prefix, $action)) {
+						return $key;	
+					}
+				} else {
+					return $action;	
+				}
+				return false;
+			}, $actions, array_keys($actions)));
 		}
 		if ($prefix) {
 			if (isset($actions[$action])) {
 				return in_array($prefix, $actions[$action]);
 			}
 		}
-		return in_array($action, $actions);
+		return in_array($action, $actions) || array_key_exists($action, $actions);
 	}
 
 	/**
