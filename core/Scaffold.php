@@ -252,6 +252,9 @@ class Scaffold extends \lithium\core\StaticObject {
 		
 		$action = $params['params']['action'];
 		if (method_exists($controller, $action) && static::$_classes['controller'] != get_class($controller)) {
+			if (method_exists($controller, '_scaffold')) {
+				$controller->invokeMethod('_scaffold', array($controller, $params['params'], $params['options']));
+			}
 			return;
 		}
 		
