@@ -45,6 +45,11 @@ class ScaffoldTest extends \lithium\test\Unit {
 		)));
 		MockPost::config(array('connection' => 'mock-source'));
 		$this->_scaffold = Scaffold::config();
+		if (!empty($this->_scaffold['scaffold'])) {
+			foreach ($this->_scaffold['scaffold'] as $name => $scaffold) {
+				Scaffold::set($name, false);
+			}
+		}
 		Scaffold::config(array(
 			'all' => true,
 			'paths' => true,
@@ -287,7 +292,7 @@ class ScaffoldTest extends \lithium\test\Unit {
 		$result = empty($controller->scaffold);
 		$this->assertFalse($result);
 		
-		$expected = array('name' => 'posts') + Scaffold::get('posts');
+		$expected = array('name' => 'posts', 'prefix' => 'default') + Scaffold::get('posts');
 		$result = $controller->scaffold;
 		$this->assertEqual($expected, $result);
 		
@@ -309,19 +314,15 @@ class ScaffoldTest extends \lithium\test\Unit {
 		$this->assertTrue($controller instanceOf $expected);
 		
 		$params = array();
-		$scaffold = Scaffold::callable($controller, $params);
+		$scaffold = Scaffold::invokeMethod('_callable', array($controller, $params));
 
 		$expected = 'sli_scaffold\controllers\ScaffoldController';
 		$this->assertTrue($scaffold instanceOf $expected);
 
-		//@todo fails due to mock sourec limitations, need's integration or mocks
-//		$expected = Scaffold::invoke($controller);
-//		$result = Scaffold::call($controller, $params);
-//		$this->assertEqual($expected, $result);
-//		
-//		$params = $this->_request();
-//		$result = $controller($params['request'], $params['params']);
-//		$this->assertEqual($expected, $result);
+		$expected = Scaffold::invoke($controller);
+		$params = $this->_request();
+		$result = $controller($params['request'], $params['params']);
+		$this->assertEqual($expected, $result);
 	}
 
 	public function testModelCalls(){

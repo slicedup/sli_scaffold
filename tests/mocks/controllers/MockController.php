@@ -12,6 +12,13 @@ class MockController extends \lithium\action\Controller {
 
 	public $scaffold;
 
+	public function _scaffold($controller) {
+		$controller->applyFilter('index', function($self, $params, $chain){
+			$params = $chain->next($self, $params, $chain);
+			$params['recordSet'] = array();
+			return $params;
+		});
+	}
 
 }
 

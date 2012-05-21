@@ -189,11 +189,11 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * the current controller/request using the.
 	 */
 	public static function invoke($controller, array $params = array(), array $options = array()) {
-		if ($callable = static::callable($controller, $params, $options)) {
+		if ($callable = static::_callable($controller, $params, $options)) {
 			if (method_exists($controller, '_scaffold')) {
 				$controller->invokeMethod('_scaffold', array($callable, $params, $options));
 			}
-			return static::call($callable, $params);
+			return Dispatcher::invokeMethod('_call', array($callable, $callable->request, $params));
 		}
 	}
 
@@ -201,7 +201,7 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * Creates a default scaffold controller instance based on the current
 	 * controller/request.
 	 */
-	public static function callable($controller, array &$params = array(), array $options = array()) {
+	protected static function _callable($controller, array &$params = array(), array $options = array()) {
 		if (property_exists($controller, 'scaffold')) {
 			$config = $controller->scaffold;
 			$params += $controller->request->params;
@@ -217,15 +217,6 @@ class Scaffold extends \lithium\core\StaticObject {
 	}
 
 	/**
-	 * Convenience wrapper for invoking scaffold controllers.
-	 */
-	public static function call($controller, $params) {
-		if (property_exists($controller, 'scaffold')) {
-			return Dispatcher::invokeMethod('_call', array($controller, $controller->request, $params));
-		}
-	}
-
-	/**
 	 * Prepare Controller environment for scaffold
 	 *
 	 * @param string $name
@@ -237,7 +228,9 @@ class Scaffold extends \lithium\core\StaticObject {
 			$controller->scaffold = $params['options']['scaffold'];
 			return;
 		}
+		
 		$name = static::_name($name);
+		
 		if (!property_exists($controller, 'scaffold') || ($config = static::get($name)) === false) {
 			return;
 		}
@@ -246,16 +239,43 @@ class Scaffold extends \lithium\core\StaticObject {
 		$config['controller'] = get_class($controller);
 		$controller->scaffold = compact('name') + $config;
 		static::set($name, $config);
+		
 		if ((isset($config['paths']) && $config['paths']) || static::$_config['paths']) {
 			static::paths($name);
 		}
+
+		$action = $_action = $params['params']['action'];
+		$prefix = false;
+		$prefixed = static::_parsePrefix($action, $config);
+		extract($prefixed);
+		$controller->scaffold['prefix'] = $prefix;
 		
+		if (method_exists($controller, $_action) && static::$_classes['controller'] != get_class($controller)) {
+			if (method_exists($controller, '_scaffold')) {
+				$controller->invokeMethod('_scaffold', array($controller, $params['params'], $params['options']));
+			}
+			return;
+		}
+		
+		if (!$prefix || !static::handledAction($name, $action, $prefix)) {
+			$prefix = $prefixes[$prefix];
+			throw new DispatchException("Action `{$_action}` not scaffolded.");
+		}
+		
+		$scaffold = get_called_class();
+		$controller->applyFilter('__invoke', function($self, $params, $chain) use($scaffold, $action){
+			$dispatchParams = $params['dispatchParams'];
+			$dispatchParams = compact('action') + ($dispatchParams ?: array());
+			$options = $params['options'];
+			return $scaffold::invoke($self, $dispatchParams, $options);
+		});	
+	}
+	
+	protected static function _parsePrefix($action, $config) {
 		$prefixes = static::$_config['prefixes'];
 		if (isset($config['prefixes'])) {
 			$prefixes = $config['prefixes'];
 		}
-		
-		$action = $_action = $params['params']['action'];
 		$prefix = false;
 		if ($prefixes) {
 			foreach ($prefixes as $key => $pre) {
@@ -269,27 +289,7 @@ class Scaffold extends \lithium\core\StaticObject {
 				$prefix = array_search('', $prefixes);
 			}
 		}
-		$controller->scaffold['prefix'] = $prefix;
-		
-		if (method_exists($controller, $_action) && static::$_classes['controller'] != get_class($controller)) {
-			if (method_exists($controller, '_scaffold')) {
-				$controller->invokeMethod('_scaffold', array($controller, $params['params'], $params['options']));
-			}
-			return;
-		}
-		
-		if (!$prefix || !static::handledAction($name, $action, $prefix)) {
-			$prefix = $prefixes[$prefix];
-			throw new DispatchException("Action `{$prefix}{$action}` not scaffolded.");
-		}
-		
-		$scaffold = get_called_class();
-		$controller->applyFilter('__invoke', function($self, $params, $chain) use($scaffold, $action){
-			$dispatchParams = $params['dispatchParams'];
-			$dispatchParams = compact('action') + ($dispatchParams ?: array());
-			$options = $params['options'];
-			return $scaffold::invoke($self, $dispatchParams, $options);
-		});	
+		return compact('action', 'prefix');
 	}
 	
 	/**
