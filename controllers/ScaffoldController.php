@@ -23,180 +23,58 @@ class ScaffoldController extends \lithium\action\Controller {
     }
 
 	public function index() {
-		$vars = static::scaffoldVars($this);
-		$fields = Scaffold::getSummaryFields($vars['model']);
-		$params = $vars + compact('fields');
-
-		$filter = function($self, $params){
-			$model = $params['model'];
-			if (empty($params['recordSet'])) {
-				$params['recordSet'] = $model::all();
-			}
-
-			$self->set($params);
-			return $params;
-		};
-
-		return $this->_filter(__METHOD__, $params, $filter);
+		return self::scaffoldAction($this, __FUNCTION__);
 	}
 
 	public function view() {
-		$vars = static::scaffoldVars($this);
-		$fields = Scaffold::getDetailFields($vars['model']);
-		$messages = array(
-			'notfound' => '{:singular} not found.'
-		);
-		$params = $vars + compact('fields', 'messages');
-
-		$filter = function($self, $params){
-			$model = $params['model'];
-			$messages = $params['messages'];
-			if (empty($params['record'])) {
-				$params['record'] = $model::first($self->request->id);
-			}
-			$record = $params['record'];
-			if (!$record) {
-				$self->flash('error', 'notfound', $messages, $params);
-				return $self->redirect($params['redirect']);
-			}
-
-			$self->set($params);
-			return $params;
-		};
-
-		return $this->_filter(__METHOD__, $params, $filter);
-
+		return self::scaffoldAction($this, __FUNCTION__);
 	}
 
 	public function add() {
-		$vars = static::scaffoldVars($this);
-		$fieldsets = Scaffold::getCreateFormFields($vars['model']);
-		$messages = array(
-			'error' => '{:singular} could not be created.',
-			'success' => '{:singular} created.'
-		);
-		$params = $vars + compact('fieldsets', 'messages');
-
-		$filter = function($self, $params){
-			$model = $params['model'];
-			$messages = $params['messages'];
-			if (empty($params['record'])) {
-				$params['record'] = $model::create();
-			}
-			$record = $params['record'];
-
-			if ($self->request->data) {
-				if ($record->save($self->request->data)) {
-					$self->flash('success', 'success', $messages, $params);
-					return $self->redirect($params['redirect']);
-				}
-				$self->flash('error', 'error', $messages, $params);
-			}
-
-			$self->set($params);
-			return $params;
-		};
-
-		return $this->_filter(__METHOD__, $params, $filter);
+		return self::scaffoldAction($this, __FUNCTION__);
 	}
 
 	public function edit() {
-		$vars = static::scaffoldVars($this);
-		$fieldsets = Scaffold::getUpdateFormFields($vars['model']);
-		$messages = array(
-			'notfound' => '{:singular} not found.',
-			'error' => '{:singular} could not be updated.',
-			'success' => '{:singular} updated.'
-		);
-		$params = $vars + compact('fieldsets', 'messages');
-
-		$filter = function($self, $params){
-			$model = $params['model'];
-			$messages = $params['messages'];
-			if (empty($params['record'])) {
-				$params['record'] = $model::find($self->request->id);
-			}
-			$record = $params['record'];
-
-			if (!$record) {
-				$self->flash('error', 'notfound', $messages, $params);
-				return $self->redirect($params['redirect']);
-			}
-
-			if ($self->request->data) {
-				if ($record->save($self->request->data)) {
-					$self->flash('success', 'success', $messages, $params);
-					return $self->redirect($params['redirect']);
-				}
-				$self->flash('error', 'error', $messages, $params);
-			}
-
-			$self->set($params);
-			return $params;
-		};
-
-		return $this->_filter(__METHOD__, $params, $filter);
+		return self::scaffoldAction($this, __FUNCTION__);
 	}
 
 	public function delete() {
-		$vars = static::scaffoldVars($this);
-		$messages = array(
-			'notfound' => '{:singular} not found.',
-			'error' => '{:singular} could not be deleted.',
-			'success' => '{:singular} deleted.'
-		);
-		$params = $vars + compact('messages');
-
-		$filter = function($self, $params){
-			$model = $params['model'];
-			$messages = $params['messages'];
-			if (empty($params['record'])) {
-				$params['record'] = $model::find($self->request->id);
-			}
-			$record = $params['record'];
-			if (!$record) {
-				$self->flash('error', 'notfound', $messages, $params);
-			} elseif($record->delete()) {
-				$self->flash('success', 'success', $messages, $params);
-			} else {
-				$self->flash('error', 'error', $messages, $params);
-			}
-			return $self->redirect($params['redirect']);
-		};
-
-		return $this->_filter(__METHOD__, $params, $filter);
+		return self::scaffoldAction($this, __FUNCTION__);
 	}
 
-	public function display() {
-		$vars = static::scaffoldVars($this);
-		$path = func_get_args() ?: array('display');
-		$params = $vars + compact('path');
-
-		$filter = function($self, $params){
-			if (!isset($params['template'])) {
-				$params['template'] = join('/', (array) $params['path']);
-			}
-			return $self->render($params);
-		};
-
-		return $this->_filter(__METHOD__, $params, $filter);
+	public function display() {		
+		return self::scaffoldAction($this, __FUNCTION__);
 	}
 
 	/**
 	 * Invoke a scaffolded action
-	 * 
-	 * @todo
 	 */
-	public static function scaffoldAction(&$controller){}
+	public static function scaffoldAction(&$controller, $action, $invoke = true){
+		$actions = static::_actions();
+		if (isset($actions[$action])) {
+			$vars = static::scaffoldVars($controller);
+			$flash = array(get_called_class(), 'flashMessage');
+			if (method_exists($controller, 'flashMessage')) {
+				$flash = array($controller, 'flashMessage');
+			}
+			$call = call_user_func($actions[$action], $controller, $action, $vars, $flash);
+			if ($invoke) {
+				extract($call);
+				$method = get_class($controller) . '::' . $action;
+				return $controller->invokeMethod('_filter', array($method, $params, $filter));
+			}
+			return $call;	
+		}
+	}
 	
 	/**
 	 * Format a  default scaffold flash message by insetring defined data and
 	 * passing the the flash message class
 	 */
-	public static function flash($key, $messageKey, $messages, $data = array()) {
+	public static function flashMessage($key, $messageKey, $messages, $data = array()) {
 		if (!empty($messages[$messageKey])) {
 			$message = $messages[$messageKey];
-			if (is_array($message)) {
+			if (!is_array($message)) {
 				$message = array($message);
 			}
 			if ($string = array_shift($message)) {
@@ -209,7 +87,6 @@ class ScaffoldController extends \lithium\action\Controller {
 
 	/**
 	 * Create & set the default view vars for a scaffolded controller
-	 * @param unknown_type $controller
 	 */
 	public static function scaffoldVars(&$controller, $set = true) {
 		$name = Inflector::humanize($controller->scaffold['name']);
@@ -226,6 +103,158 @@ class ScaffoldController extends \lithium\action\Controller {
 			$controller->set($vars);
 		}
 		return $vars;
+	}
+	
+	/**
+	 * Get scaffold action definitions
+	 */
+	protected static function _actions() {
+		$actions = array(
+			'index' => function(&$controller, $action, $vars, $flash) {
+				$fields = Scaffold::getSummaryFields($vars['model']);
+				$params = $vars + compact('fields');
+				$filter = function($self, $params){
+					$model = $params['model'];
+					if (empty($params['recordSet'])) {
+						$params['recordSet'] = $model::all();
+					}
+		
+					$self->set($params);
+					return $params;
+				};
+				return compact('params', 'filter');
+			},
+			
+			'view' => function(&$controller, $action, $vars, $flash) {
+				$fields = Scaffold::getDetailFields($vars['model']);
+				$messages = array(
+					'notfound' => '{:singular} not found.'
+				);
+				$params = $vars + compact('fields', 'messages');
+		
+				$filter = function($self, $params) use($flash){
+					$model = $params['model'];
+					$messages = $params['messages'];
+					if (empty($params['record'])) {
+						$params['record'] = $model::first($self->request->id);
+					}
+					$record = $params['record'];
+					if (!$record) {
+						call_user_func_array($flash, array('error', 'notfound', $messages, $params));
+						return $self->redirect($params['redirect']);
+					}
+		
+					$self->set($params);
+					return $params;
+				};
+				return compact('params', 'filter');
+			},
+			
+			'add' => function(&$controller, $action, $vars, $flash) {
+				$fieldsets = Scaffold::getCreateFormFields($vars['model']);
+				$messages = array(
+					'error' => '{:singular} could not be created.',
+					'success' => '{:singular} created.'
+				);
+				$params = $vars + compact('fieldsets', 'messages');
+		
+				$filter = function($self, $params) use($flash){
+					$model = $params['model'];
+					$messages = $params['messages'];
+					if (empty($params['record'])) {
+						$params['record'] = $model::create();
+					}
+					$record = $params['record'];
+		
+					if ($self->request->data) {
+						if ($record->save($self->request->data)) {
+							call_user_func_array($flash, array('success', 'success', $messages, $params));
+							return $self->redirect($params['redirect']);
+						}
+						call_user_func_array($flash, array('error', 'error', $messages, $params));
+					}
+		
+					$self->set($params);
+					return $params;
+				};
+				return compact('params', 'filter');
+			},
+			
+			'edit' => function(&$controller, $action, $vars, $flash) {
+				$fieldsets = Scaffold::getUpdateFormFields($vars['model']);
+				$messages = array(
+					'notfound' => '{:singular} not found.',
+					'error' => '{:singular} could not be updated.',
+					'success' => '{:singular} updated.'
+				);
+				$params = $vars + compact('fieldsets', 'messages');
+		
+				$filter = function($self, $params) use($flash){
+					$model = $params['model'];
+					$messages = $params['messages'];
+					if (empty($params['record'])) {
+						$params['record'] = $model::find($self->request->id);
+					}
+					$record = $params['record'];
+		
+					if (!$record) {
+						call_user_func_array($flash, array('error', 'notfound', $messages, $params));
+						return $self->redirect($params['redirect']);
+					}
+		
+					if ($self->request->data) {
+						if ($record->save($self->request->data)) {
+							call_user_func_array($flash, array('success', 'success', $messages, $params));
+							return $self->redirect($params['redirect']);
+						}
+						call_user_func_array($flash, array('error', 'error', $messages, $params));
+					}
+		
+					$self->set($params);
+					return $params;
+				};
+				return compact('params', 'filter');
+			},
+			
+			'delete' => function(&$controller, $action, $vars, $flash) {
+				$messages = array(
+					'notfound' => '{:singular} not found.',
+					'error' => '{:singular} could not be deleted.',
+					'success' => '{:singular} deleted.'
+				);
+				$params = $vars + compact('messages');
+				$filter = function($self, $params) use($flash){
+					$model = $params['model'];
+					$messages = $params['messages'];
+					if (empty($params['record'])) {
+						$params['record'] = $model::find($self->request->id);
+					}
+					$record = $params['record'];
+					if (!$record) {
+						call_user_func_array($flash, array('error', 'notfound', $messages, $params));
+					} elseif($record->delete()) {
+						call_user_func_array($flash, array('success', 'success', $messages, $params));
+					} else {
+						call_user_func_array($flash, array('error', 'error', $messages, $params));
+					}
+					return $self->redirect($params['redirect']);
+				};
+				return compact('params', 'filter');
+			},
+			
+			'display' => function(&$controller, $action, $vars, $flash) {
+				$path = func_get_args() ?: array('display');
+				$params = $vars + compact('path');
+		
+				$filter = function($self, $params){
+					if (!isset($params['template'])) {
+						$params['template'] = join('/', (array) $params['path']);
+					}
+					return $self->render($params);
+				};
+				return compact('params', 'filter');
+			}
+		);
 	}
 }
 
