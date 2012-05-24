@@ -208,7 +208,6 @@ class Scaffold extends \lithium\core\StaticObject {
 		}
 		
 		if (!$prefix || !static::handledAction($name, $action, $prefix)) {
-			$prefix = $prefixes[$prefix];
 			throw new DispatchException("Action `{$_action}` not scaffolded.");
 		}
 		
