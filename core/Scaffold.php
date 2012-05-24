@@ -85,7 +85,10 @@ class Scaffold extends \lithium\core\StaticObject {
 			if (isset($config['scaffold'])) {
 				static::set($config['scaffold']);
 			}
-			unset($config['scaffold']);
+			if (isset($config['classes'])) {
+				static::$_classes = $config['classes'] + static::$_classes;
+			}
+			unset($config['scaffold'], $config['classes']);
 			static::$_config = $config + static::$_config;
 		}
 		return static::$_config + array('scaffold' => static::$_scaffold);
