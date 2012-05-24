@@ -319,7 +319,7 @@ class ScaffoldTest extends \lithium\test\Unit {
 		$expected = 'sli_scaffold\controllers\ScaffoldController';
 		$this->assertTrue($scaffold instanceOf $expected);
 
-		$expected = Scaffold::invoke($controller);
+		$expected = Scaffold::invokeMethod('_invoke', array($controller));
 		$params = $this->_request();
 		$result = $controller($params['request'], $params['params']);
 		$this->assertEqual($expected, $result);
