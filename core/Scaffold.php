@@ -13,7 +13,6 @@ use lithium\action\DispatchException;
 use lithium\core\Libraries;
 use lithium\util\Set;
 use lithium\util\Inflector;
-use sli_scaffold\models\Scaffolds as Model;
 use sli_base\net\http\Media;
 use BadMethodCallException;
 
@@ -69,7 +68,8 @@ class Scaffold extends \lithium\core\StaticObject {
 			$message = "Method %s not defined or handled in class %s";
 			throw new BadMethodCallException(sprintf($message, $method, get_class()));
 		}
-		return Model::invokeMethod($method, $params);
+		$model = static::$_classes['model'];
+		return $model::invokeMethod($method, $params);
 	}
 
 	/**
