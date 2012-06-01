@@ -193,12 +193,7 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param \lithium\action\Controller $controller
 	 * @param array $params
 	 */
-	public static function prepare($name, &$controller, $params){
-		if (!empty($params['options']['scaffold'])) {
-			$controller->scaffold = $params['options']['scaffold'];
-			return;
-		}
-		
+	public static function prepare($name, &$controller, $params){		
 		if (!property_exists($controller, 'scaffold') || ($config = static::get($name)) === false) {
 			return;
 		}
@@ -376,6 +371,7 @@ class Scaffold extends \lithium\core\StaticObject {
 			if (method_exists($controller, '_scaffold')) {
 				$controller->invokeMethod('_scaffold', array($callable, $params, $options));
 			}
+			$callable->scaffold = $controller->scaffold;
 			return Dispatcher::invokeMethod('_call', array($callable, $callable->request, $params));
 		}
 	}
@@ -389,9 +385,6 @@ class Scaffold extends \lithium\core\StaticObject {
 			$config = $controller->scaffold;
 			$params += $controller->request->params;
 			$params['controller'] = static::$_classes['controller'];
-			$options+= array(
-				'scaffold' => $config
-			);
 			return Dispatcher::invokeMethod('_callable', array($controller->request, $params, $options));
 		}
 	}
