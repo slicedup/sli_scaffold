@@ -29,14 +29,15 @@ $this->title($t($plural));
 		?>
 	</div>
 	<ul class="actions">
+		<li><strong>Actions</strong></li>
 		<?php if(in_array('view', $actions)):?>
-		<li><?php echo $this->html->link($t('View'), array('action' => 'view', 'args' => $record->key()));?></li>
+		<li><?php echo $this->html->link($t('{:action} {:entity}', array('action' => $t('View'), 'entity' => $t($singular))), array('action' => 'view', 'args' => $record->key()));?></li>
 		<?php endif;?>
 		<?php if(in_array('delete', $actions)):?>
-		<li><?php echo $this->html->link($t('Delete'), array('action' => 'delete', 'args' => $record->key()));?></li>
+		<li><?php echo $this->html->link($t('{:action} {:entity}', array('action' => $t('Delete'), 'entity' => $t($singular))), array('action' => 'delete', 'args' => $record->key()));?></li>
 		<?php endif;?>
 		<?php if(in_array('index', $actions)):?>
-		<li><?php echo $this->html->link($t($plural), array('action' => 'index'));?></li>
+		<li><?php echo $this->html->link($t('{:action} {:entity}', array('action' => $t('List'), 'entity' => $t($plural))), array('action' => 'index'));?></li>
 		<?php endif;?>
 	</ul>
 </div>

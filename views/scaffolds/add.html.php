@@ -29,8 +29,9 @@ $this->title($t($plural));
 		?>
 	</div>
 	<ul class="actions">
+		<li><strong>Actions</strong></li>
 		<?php if(in_array('index', $actions)):?>
-		<li><?php echo $this->html->link($t($plural), array('action' => 'index'));?></li>
+		<li><?php echo $this->html->link($t('{:action} {:entity}', array('action' => $t('List'), 'entity' => $t($plural))), array('action' => 'index'));?></li>
 		<?php endif;?>
 	</ul>
 </div>

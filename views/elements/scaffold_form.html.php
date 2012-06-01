@@ -9,14 +9,16 @@
 	echo $this->Form->create($record, compact('url'));
 	foreach($fieldsets as $fieldset):
 		echo '<fieldset>';
-		if (isset($fieldset['legend'])):
-			echo '<legend>' . $t($fieldset['legend']) . '</legend>';
+		if (!isset($fieldset['legend'])):
+			$model = $record->model();
+			$fieldset['legend'] = $model::meta('name');
 		endif;
+		echo '<legend>' . $t($fieldset['legend']) . '</legend>';
 		foreach($fieldset['fields'] as $field => $options):
 			echo $this->Form->field($field, $options);
 		endforeach;
 		echo '</fieldset>';
 	endforeach;
-	echo $this->Form->field($t('Create'), array('type' => 'submit', 'label' => false));
+	echo $this->Form->field($t('Save'), array('type' => 'submit', 'label' => false));
 	echo $this->Form->end();
 ?>

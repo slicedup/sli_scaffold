@@ -39,6 +39,7 @@ $this->title($t($plural));
 		</table>
 	</div>
 	<ul class="actions">
+		<li><strong>Actions</strong></li>
 		<?php if(in_array('add', $actions)):?>
 		<li><?php echo $this->html->link($t('{:action} {:entity}', array('action' => $t('Add'), 'entity' => $t($singular))), array('action' => 'add'));?></li>
 		<?php endif;?>
