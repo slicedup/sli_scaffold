@@ -8,7 +8,6 @@
 
 use lithium\core\Libraries;
 use lithium\action\Dispatcher;
-use lithium\action\DispatchException;
 use lithium\net\http\Media;
 use lithium\util\String;
 use sli_scaffold\core\Scaffold;
