@@ -89,12 +89,12 @@ class ScaffoldController extends \lithium\action\Controller {
 	 * Create & set the default view vars for a scaffolded controller
 	 */
 	public static function scaffoldVars(&$controller, $set = true) {
-		$name = Inflector::humanize($controller->scaffold['name']);
+		$name = Inflector::humanize($controller->scaffold['_name']);
 		$vars = array(
 			'model' => Scaffold::model($controller->scaffold['name']),
 			'plural' => Inflector::pluralize($name),
 			'singular' => Inflector::singularize($name),
-			'actions' => Scaffold::handledAction($name, null, $controller->scaffold['prefix']),
+			'actions' => Scaffold::handledAction($controller->scaffold['name'], null, $controller->scaffold['prefix']),
 			'action' => $controller->request->params['action'],
 			'url' => $controller->request->url,
 			'redirect' => array('action' => 'index')
