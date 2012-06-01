@@ -103,7 +103,7 @@ class ScaffoldsTest extends \lithium\test\Unit {
 		$expected = array(
 			array(
 				'legend' => null,
-				'fields' => Model::invokeMethod('_mapFormFields', array($post))
+				'fields' => Model::invokeMethod('mapFormFields', array($post))
 			)
 		);
 		$this->assertEqual($expected, $fields);

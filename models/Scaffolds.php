@@ -286,8 +286,7 @@ class Scaffolds extends \lithium\data\Model {
 							'fields' => $_fieldset
 						);
 					}
-					$map = array($model, $_fieldset['fields'], $mapping);
-					$_fieldset['fields'] = $self::invokeMethod('_mapFormFields', $map);
+					$_fieldset['fields'] = $self::mapFormFields($model, $_fieldset['fields'], $mapping);
 					if (!isset($_fieldset['legend'])) {
 						$_fieldset['legend'] = !is_int($key) ? $key : null;
 					}
@@ -310,7 +309,9 @@ class Scaffolds extends \lithium\data\Model {
 		return array();
 	}
 
-	public function setFieldMapping($mapping, $fields = array()) {}
+	public function setFieldMapping($mapping, $fields = array()) {
+		static::$_formFieldMappings[$mapping] = $fields;
+	}
 
 	/**
 	 * Apply form field mappings to a model schema
@@ -319,7 +320,7 @@ class Scaffolds extends \lithium\data\Model {
 	 * @param mixed $mapping
 	 * @param array $fieldset
 	 */
-	protected static function _mapFormFields($model, $fieldset = array(), $mapping = null){
+	protected static function mapFormFields($model, $fieldset = array(), $mapping = null){
 		if (!is_array($mapping)) {
 			$mapping = static::getFieldMapping($mapping);
 		}
