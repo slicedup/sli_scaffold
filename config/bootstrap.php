@@ -35,6 +35,9 @@ Dispatcher::applyFilter('run', function($self, $params, $chain) {
  * Dispatch filter to handle scaffold requests
  */
 Dispatcher::applyFilter('_callable', function($self, $params, $chain) {
+	if (isset($params['options']['scaffold'])) {
+		return $chain->next($self, $params, $chain);
+	}
 	$controller = $params['params']['controller'];
 	$_controller = Libraries::locate('controllers', $controller);
 	if(!$_controller && $scaffold = Scaffold::detect($params['params'])) {

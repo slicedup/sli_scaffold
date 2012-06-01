@@ -382,9 +382,10 @@ class Scaffold extends \lithium\core\StaticObject {
 	 */
 	protected static function _callable($controller, array &$params = array(), array $options = array()) {
 		if (property_exists($controller, 'scaffold')) {
-			$config = $controller->scaffold;
+			$scaffold = $controller->scaffold;
 			$params += $controller->request->params;
 			$params['controller'] = static::$_classes['controller'];
+			$options += compact('scaffold');
 			return Dispatcher::invokeMethod('_callable', array($controller->request, $params, $options));
 		}
 	}
