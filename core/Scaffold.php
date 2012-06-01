@@ -419,15 +419,29 @@ class Scaffold extends \lithium\core\StaticObject {
 			'prepend' => array()
 		);
 		
-		if ($_library && $_library != 'app' && $library = Libraries::get($_library)) {
-			$paths['append']['template'][] = $library['path'] . '/views/{:controller}/{:template}.{:type}.php';
-			$paths['append']['template'][] = $library['path'] . '/views/'.$_name.'/{:template}.{:type}.php';
-			$paths['append']['template'][] = $library['path'] . '/views/scaffold/{:template}.{:type}.php';
-			$paths['append']['layout'][] = $library['path'] . '/views/layouts/{:layout}.{:type}.php';	
+		$addLibraryPaths = function($base, $_name) use(&$paths) {
+			$paths['append']['template'][] = $base . '/views/{:controller}/{:template}.{:type}.php';
+			$paths['append']['template'][] = $base . '/views/'.$_name.'/{:template}.{:type}.php';
+			$paths['append']['template'][] = $base . '/views/scaffolds/{:template}.{:type}.php';
+			$paths['append']['layout'][] = $base . '/views/layouts/{:layout}.{:type}.php';
+		};
+		
+		if (is_string($config['paths'])) {
+			$base = $config['paths'];
+			if ($library = Libraries::get($config['paths'])) {
+				$base = $library['path'];
+			}
+			$addLibraryPaths($base, $_name);
 		}
-		$paths['append']['template'][] = LITHIUM_APP_PATH . '/views/'.$_name.'/{:template}.{:type}.php';
-		$paths['append']['template'][] = LITHIUM_APP_PATH . '/views/scaffold/{:template}.{:type}.php'; //app scaffolds
-		$paths['append']['template'][] = $scaffold['path'] . '/views/scaffold/{:template}.{:type}.php'; //default scaffolds
+		
+		if ($_library && $_library != 'app' && $library = Libraries::get($_library)) {
+			$base = $library['path'];
+			$addLibraryPaths($base, $_name);
+		}
+		
+		$paths['append']['template'][] = LITHIUM_APP_PATH . '/views/'.$_name.'/{:template}.{:type}.php'; //app scaffolds
+		$paths['append']['template'][] = LITHIUM_APP_PATH . '/views/scaffolds/{:template}.{:type}.php'; //app scaffolds
+		$paths['append']['template'][] = $scaffold['path'] . '/views/scaffolds/{:template}.{:type}.php'; //default scaffolds
 		$paths['append']['layout'][] = LITHIUM_APP_PATH . '/views/layouts/{:layout}.{:type}.php'; //app layout
 		
 		$params = compact('paths') + array('name' => $name);
