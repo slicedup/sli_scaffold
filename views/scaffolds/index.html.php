@@ -25,11 +25,13 @@ $this->title($t($plural));
 				<td class="actions">
 					<?php
 						$_actions = array('view', 'edit', 'delete');
+						$_links = array();
 						foreach ($_actions as $action):
 							if(in_array($action, $actions)):
-								echo $this->html->link($t(ucfirst($action)), array('action' => $action, 'args' => $record->key()));
+								$_links[] = $this->html->link($t(ucfirst($action)), array('action' => $action, 'args' => $record->key()));
 							endif;
 						endforeach;
+						echo join('&nbsp;|&nbsp;', $_links);
 					?>
 				</td>
 			</tr>
