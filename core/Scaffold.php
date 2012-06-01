@@ -180,9 +180,13 @@ class Scaffold extends \lithium\core\StaticObject {
 		$lookup = array("{$library}.{$name}");
 		$libset ? array_push($lookup, $name) : array_unshift($lookup, $name);
 		foreach ($lookup as $key) {
-			if (static::get($key) !== false) {
+			if (isset(static::$_scaffold[$key])) {
 				return $key;
 			}
+		}
+		$key = array_shift($lookup);
+		if (static::get($key, false) !== false) {
+			return $key;
 		}
 	}
 
