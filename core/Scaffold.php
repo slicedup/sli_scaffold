@@ -114,11 +114,15 @@ class Scaffold extends \lithium\core\StaticObject {
 			}
 			return;
 		}
-
-		$name = static::_name($name);
 		if ($config === false) {
 			unset(static::$_scaffold[$name]);
 		} else {
+			$_library =  null;
+			$_name = $name;
+			if (strpos($name, '.')) {
+				list($_library, $_name) = explode('.', $name);
+			}
+			$config = compact('name', '_name', '_library') + $config;
 			static::$_scaffold[$name] = $config;
 		}
 	}
@@ -131,39 +135,55 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * config options explicitly set only
 	 */
 	public static function get($name, $fullConfig = true) {
-		$name = static::_name($name);
-		$config = true;
-		if (isset(static::$_scaffold[$name])) {
-			$config = static::$_scaffold[$name];
-		} elseif (empty(static::$_config['all'])) {
-			return false;
+		if (!isset(static::$_scaffold[$name])) {
+			if (empty(static::$_config['all'])) {
+				return false;
+			}
+			static::set($name);
 		}
+		$config = static::$_scaffold[$name];
 		if (!$fullConfig) {
 			return $config;
-		}
-		if (!is_array($config)) {
-			$config = array();
 		}
 		$config += static::_defaults($name);
 		return $config;
 	}
 
 	/**
-	 * Obtain default scaffold name from dispatch params
-	 *
-	 * @param $params
-	 * @return string
+	 * Detect scaffold config from dispatch params
+	 * 
+	 * @param mixed $params array dispatch params, string controller name variation
 	 */
-	public static function name($params, $full = false) {
+	public static function detect($params) {
+		$library = 'app';
+		$libset = false;
 		if (is_string($params)) {
 			$name = $params;
 		} else {
 			$name = $params['controller'];
 			if (!empty($params['library'])) {
-				$name = $params['library'] . '.' . $name;
+				$libset = true;
+				$library = $params['library'];
 			}
 		}
-		return static::_name($name, $full);
+		if (strpos($name, '.')) {
+			$libset = true;
+			list($library, $name) = explode('.', $name);
+		}
+		if (strpos($name, '\\') !== false) {
+			$path = explode('\\', $name);
+			$library = array_shift($path);
+			$name = array_pop($path);
+		}
+		$name = Inflector::underscore($name);
+		$name = trim(preg_replace(array('/_?controller(s)?/', '/^.*_/'), '', $name), ' _');
+		$lookup = array("{$library}.{$name}");
+		$libset ? array_push($lookup, $name) : array_unshift($lookup, $name);
+		foreach ($lookup as $key) {
+			if (static::get($key) !== false) {
+				return $key;
+			}
+		}
 	}
 
 	/**
@@ -179,19 +199,19 @@ class Scaffold extends \lithium\core\StaticObject {
 			return;
 		}
 		
-		$name = static::_name($name);
-		
 		if (!property_exists($controller, 'scaffold') || ($config = static::get($name)) === false) {
 			return;
 		}
 
 		$config = (array) $controller->scaffold + $config;
 		$config['controller'] = get_class($controller);
-		$controller->scaffold = compact('name') + $config;
+		$controller->scaffold = $config;
 		static::set($name, $config);
-		
-		if ((isset($config['paths']) && $config['paths']) || static::$_config['paths']) {
-			static::_paths($name);
+		if (!isset($config['paths'])) {
+			$config['paths'] = static::$_config['paths'];
+		}
+		if ($config['paths']) {
+			static::_paths($config);
 		}
 
 		$action = $_action = $params['params']['action'];
@@ -241,6 +261,8 @@ class Scaffold extends \lithium\core\StaticObject {
 			} else {
 				$controller = $config['controller'];
 			}
+		} else {
+			$controller = static::_locate('controllers', $config['_name'], $config['_library']);
 		}
 		if (!$controller && $default) {
 			$controller = static::$_classes['controller'];
@@ -270,7 +292,7 @@ class Scaffold extends \lithium\core\StaticObject {
 				$model = $config['model'];
 			}
 		} else {
-			$model = Libraries::locate('models', Inflector::pluralize(Inflector::classify($name)));
+			$model = static::_locate('models', $config['_name'], $config['_library']);
 		}
 		if (!$model && $default) {
 			$model = static::$_classes['model'];
@@ -280,9 +302,21 @@ class Scaffold extends \lithium\core\StaticObject {
 			}
 			$model::meta(array(
 				'connection' => $connection,
-				'source' => Inflector::tableize($name),
-				'name' => Inflector::pluralize(Inflector::classify($name))
+				'name' => Inflector::pluralize(Inflector::classify($config['_name']))
 			));
+			$lookup = static::_source($config['_name'], $config['_library']);
+			$source = $lookup[0];
+			if ($connection = $model::connection()) {
+				if ($sources = $connection->sources()) {
+					foreach ($lookup as $collection) {
+						if (in_array($collection, $sources)) {
+							$source = $collection;
+							break;
+						}
+					}
+				}
+			}
+			$model::meta(compact('source'));
 		}
 		return $model;
 	}
@@ -332,27 +366,6 @@ class Scaffold extends \lithium\core\StaticObject {
 			'model' => static::model($name, false) ?: null
 		);
 	}
-	
-	/**
-	 * Convert string to a scaffold name
-	 *
-	 * @param string $name
-	 * @return string mixed
-	 */
-	protected static function _name($name, $full = false) {
-		$library = 'app';
-		$sep = strpos($name, '\\') ? '\\' : '.';
-		if ($lib = strpos($name, $sep)) {
-			$library = substr($name, 0, $lib);
-			$name = substr($name, $lib + 1);
-		}
-		$name = Inflector::underscore($name);
-		$name = trim(preg_replace('/_?controller(s)?/', '', $name), ' _');
-		if ($library != 'app' || $full) {
-			$name = "{$library}.{$name}";
-		}
-		return $name;
-	}
 
 	/**
 	 * Invokes a scaffolded action on the default scaffold controller based on
@@ -390,8 +403,7 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @return null
 	 * @filter
 	 */
-	protected static function _paths($name) {
-		$name = static::_name($name, true);
+	protected static function _paths($config) {
 		$scaffold = Libraries::get('sli_scaffold');
 		$paths = array(
 			'append' => array(
@@ -407,20 +419,23 @@ class Scaffold extends \lithium\core\StaticObject {
 			'prepend' => array()
 		);
 
-		list($library, $_name) = explode('.', $name);
-		$library = Libraries::get($library);
-		$paths['prepend']['template'] = array(
-			$library['path'] . '/views/'.$_name.'/{:template}.{:type}.php',
-			$library['path'] . '/views/{:controller}/{:template}.{:type}.php'
-		);
-		$paths['prepend']['layout'] = array(
-			$library['path'] . '/views/layouts/{:layout}.{:type}.php'
-		);
+		$name = $config['name'];
+		$_name = $config['_name'];
+		$_library = $config['_library'];
+		
+		if ($_library && $_library != 'app' && $library = Libraries::get($_library)) {
+			$paths['prepend']['template'] = array(
+				$library['path'] . '/views/'.$_name.'/{:template}.{:type}.php',
+				$library['path'] . '/views/{:controller}/{:template}.{:type}.php'
+			);
+			$paths['prepend']['layout'] = array(
+				$library['path'] . '/views/layouts/{:layout}.{:type}.php'
+			);	
+		}
 
 		$params = compact('paths') + array('name' => $name);
 
 		$filter = function($self, $params, $chain){
-			$name = $params['name'];
 			$paths = $params['paths'];
 			$html = Media::type('html');
 			if (empty($html['options']['paths'])) {
@@ -462,6 +477,53 @@ class Scaffold extends \lithium\core\StaticObject {
 			}
 		}
 		return compact('action', 'prefix');
+	}
+	
+	/**
+	 * Locate a given class type (contoller or model) based on a configured
+	 * scaffold name given prefernce to libraries if configured, and also
+	 * accounting for incorrect pluralization.
+	 * 
+	 * @param string $type
+	 * @param string $name
+	 * @param string $library
+	 */
+	protected static function _locate($type, $name, $library = null) {
+		$singular = Inflector::classify($name);
+		$plural = Inflector::pluralize($singular);
+		$lookup = array($plural, $singular);
+		if ($library) {
+			foreach ($lookup as $className) {
+				if ($className = Libraries::locate($type, $className, compact('library'))) {
+					return $className;
+				}
+			}
+		}
+		foreach ($lookup as $className) {
+			if ($className = Libraries::locate($type, $className)) {
+				return $className;
+			}
+		}
+	}
+	
+	/**
+	 * Generate a list of possible collection/tabel names based on a configured
+	 * scaffold name accounting for library prefixes
+	 * 
+	 * @param string $name
+	 * @param string $library
+	 */
+	protected static function _source($name, $library = null) {
+		$singular = Inflector::singularize(Inflector::tableize($name));
+		$plural = Inflector::pluralize($singular);
+		if (isset($library)) {
+			$_singular = Inflector::singularize(Inflector::tableize("{$library}.{$name}"));
+			$_plural = Inflector::pluralize($_singular);
+			$lookup = array($_plural, $plural, $_singular, $singular);
+		} else {
+			$lookup = array($plural, $singular);
+		}
+		return $lookup;
 	}
 }
 

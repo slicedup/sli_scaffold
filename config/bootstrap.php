@@ -8,9 +8,10 @@
 
 use lithium\core\Libraries;
 use lithium\action\Dispatcher;
-use sli_scaffold\core\Scaffold;
+use lithium\action\DispatchException;
 use lithium\net\http\Media;
 use lithium\util\String;
+use sli_scaffold\core\Scaffold;
 
 /**
  * Dispatch filter to patch the call to translate in scaffold templates that
@@ -35,24 +36,24 @@ Dispatcher::applyFilter('run', function($self, $params, $chain) {
  * Dispatch filter to handle scaffold requests
  */
 Dispatcher::applyFilter('_callable', function($self, $params, $chain) {
-	$scaffoldName = Scaffold::name($params['params']);
 	$controller = $params['params']['controller'];
-
-	if(!Libraries::locate('controllers', $controller)) {
-		if ($controller = Scaffold::controller($scaffoldName)) {
+	$_controller = Libraries::locate('controllers', $controller);
+	if(!$_controller && $scaffold = Scaffold::detect($params['params'])) {
+		if ($controller = Scaffold::controller($scaffold)) {
 			$params['params']['controller'] = $controller;
 		}
+	} else {
+		$scaffold = Scaffold::detect(array('controller' => $_controller) + $params['params']);
 	}
-
 	$controller = $chain->next($self, $params, $chain);
-
 	if (property_exists($controller, 'scaffold')) {
 		if (isset($controller->scaffold['name'])) {
-			$scaffoldName = $controller->scaffold['name'];
+			$scaffold = $controller->scaffold['name'];
 		}
-		Scaffold::prepare($scaffoldName, $controller, $params);
+		if ($scaffold) {
+			Scaffold::prepare($scaffold, $controller, $params);
+		}
 	}
-
 	return $controller;
 });
 ?>

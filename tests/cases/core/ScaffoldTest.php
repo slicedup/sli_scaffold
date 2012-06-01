@@ -118,57 +118,80 @@ class ScaffoldTest extends \lithium\test\Unit {
 		$this->assertTrue(!empty($result));
 	}
 
-	public function testName() {
+	public function testDetect() {
 		$expected = 'posts';
 
 		$params = array(
 			'controller' => 'app\controllers\PostsController'
 		);
-		$result = Scaffold::name($params);
+		$result = Scaffold::detect($params);
 		$this->assertEqual($expected, $result);
+		
+		$params = 'app\controllers\PostsController';
+		$result = Scaffold::detect($params);
+		$this->assertEqual($expected, $result);
+		
 		$params = array(
 			'controller' => 'Posts'
 		);
-		$result = Scaffold::name($params);
+		$result = Scaffold::detect($params);
 		$this->assertEqual($expected, $result);
-
-		$params = 'app\controllers\PostsController';
-		$result = Scaffold::name($params);
+		
+		$params = 'Posts';
+		$result = Scaffold::detect($params);
 		$this->assertEqual($expected, $result);
-
+		
+		$expected = 'app.posts';
+		
+		$params = array(
+			'library' => 'app',
+			'controller' => 'app\controllers\PostsController'
+		);
+		$result = Scaffold::detect($params);
+		$this->assertEqual($expected, $result);
+		
+		$params = array(
+			'controller' => 'app.app\controllers\PostsController'
+		);
+		$result = Scaffold::detect($params);
+		$this->assertEqual($expected, $result);
+		
+		$params = array(
+			'library' => 'app',
+			'controller' => 'PostsController'
+		);
+		$result = Scaffold::detect($params);
+		$this->assertEqual($expected, $result);
+		
+		$params = array(
+			'controller' => 'app.Posts'
+		);
+		$result = Scaffold::detect($params);
+		$this->assertEqual($expected, $result);
+		
+		$params = array(
+			'controller' => 'app.PostsController'
+		);
+		$result = Scaffold::detect($params);
+		$this->assertEqual($expected, $result);
+		
 		$params = array(
 			'library' => 'app',
 			'controller' => 'Posts'
 		);
-		$result = Scaffold::name($params);
+		$result = Scaffold::detect($params);
 		$this->assertEqual($expected, $result);
-
-		$params = 'Posts';
-		$result = Scaffold::name($params);
+		
+		$params = 'app.app\controllers\PostsController';
+		$result = Scaffold::detect($params);
 		$this->assertEqual($expected, $result);
-
-		$params = 'app.posts';
-		$result = Scaffold::name($params);
+		
+		$params = 'app.PostsController';
+		$result = Scaffold::detect($params);
 		$this->assertEqual($expected, $result);
 		
 		$params = 'app.Posts';
-		$result = Scaffold::name($params);
-		$this->assertEqual($expected, $result);
-		
-		$expected = 'lib.posts';
-		$params = 'lib\controllers\PostsController';
-		$result = Scaffold::name($params);
-		$this->assertEqual($expected, $result);
-
-		$params = 'lib\\Posts';
-		$result = Scaffold::name($params);
-		$this->assertEqual($expected, $result);
-
-		$params = array(
-			'library' => 'lib',
-			'controller' => 'Posts'
-		);
-		$result = Scaffold::name($params);
+		$result = Scaffold::detect($params);
 		$this->assertEqual($expected, $result);
 	}
 
@@ -178,16 +201,27 @@ class ScaffoldTest extends \lithium\test\Unit {
 			'scaffold' => array(
 				'posts',
 				'pages',
-				'comments' => array(
+				'app.comments' => array(
 					'this' => 'that'
 				)
 			)
 		);
 		$expected = array_merge($config, array(
 			'scaffold' => array(
-				'posts' => array(),
-				'pages' => array(),
-				'comments' => array(
+				'posts' => array(
+					'name' => 'posts',
+					'_name' => 'posts',
+					'_library' => null
+				),
+				'pages' => array(
+					'name' => 'pages',
+					'_name' => 'pages',
+					'_library' => null
+				),
+				'app.comments' => array(
+					'name' => 'app.comments',
+					'_name' => 'comments',
+					'_library' => 'app',
 					'this' => 'that'
 				)
 			)
@@ -244,39 +278,40 @@ class ScaffoldTest extends \lithium\test\Unit {
 	}
 
 	public function testModelGetter() {
-		Scaffold::set('mock_posts');
+		Scaffold::set('mock_posts', array());
+		$expected = 'sli_scaffold\tests\mocks\data\MockPost';
+		$result = Scaffold::model('mock_posts');
+		$this->assertIdentical($expected, $result);
 		$result = Scaffold::get('mock_posts');
-		$this->assertNull($result['model']);
+		$this->assertIdentical($expected, $result['model']);
+		
+		$config = array(
+			'model' => 'sli_scaffold\tests\mocks\models\NonExistentModel'
+		);
+		Scaffold::set('mock_posts', $config);
+		$expected = 'sli_scaffold\models\Scaffolds';
+		$this->assertIdentical($expected, Scaffold::model('mock_posts'));
+		
+		$config = array(
+			'model' => 'NonExistentModel'
+		);
+		Scaffold::set('mock_posts', $config);
 		$expected = 'sli_scaffold\models\Scaffolds';
 		$this->assertIdentical($expected, Scaffold::model('mock_posts'));
 
 		$config = array(
-			'model' => 'sli_scaffold\tests\mocks\models\NonExistentModel'
-		);
-		Scaffold::set('posts', $config);
-		$expected = 'sli_scaffold\models\Scaffolds';
-		$this->assertIdentical($expected, Scaffold::model('posts'));
-
-		$config = array(
-			'model' => 'NonExistentModel'
-		);
-		Scaffold::set('posts', $config);
-		$expected = 'sli_scaffold\models\Scaffolds';
-		$this->assertIdentical($expected, Scaffold::model('posts'));
-
-		$config = array(
 			'model' => 'sli_scaffold\tests\mocks\data\MockPost'
 		);
-		Scaffold::set('posts', $config);
+		Scaffold::set('mock_posts', $config);
 		$expected = $config['model'];
-		$this->assertIdentical($expected, Scaffold::model('posts'));
+		$this->assertIdentical($expected, Scaffold::model('mock_posts'));
 
 		$config = array(
 			'model' => 'MockPost'
 		);
-		Scaffold::set('posts', $config);
+		Scaffold::set('mock_posts', $config);
 		$expected = 'sli_scaffold\tests\mocks\data\MockPost';
-		$this->assertIdentical($expected, Scaffold::model('posts'));
+		$this->assertIdentical($expected, Scaffold::model('mock_posts'));
 		$meta = $expected::meta();
 		$this->assertEqual('MockPost', $meta['name']);
 		$this->assertEqual('mock_posts', $meta['source']);
