@@ -522,7 +522,7 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param array $config
 	 * @param boolean $keys
 	 */
-	protected static function _prefixes($config, $keys = false) {
+	protected static function _prefixes($config = array(), $keys = false) {
 		$prefixes = static::$_config['prefixes'];
 		if (isset($config['prefixes'])) {
 			$prefixes = array();
