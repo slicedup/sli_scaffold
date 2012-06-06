@@ -113,13 +113,14 @@ class ScaffoldController extends \lithium\action\Controller {
 		return array(
 			'index' => function(&$controller, $action, $vars, $flash) {
 				$fields = Scaffold::getSummaryFields($vars['model']);
-				$params = $vars + compact('fields');
+				$query = array();
+				$params = $vars + compact('fields', 'query');
 				$filter = function($self, $params){
-					$model = $params['model'];
-					if (empty($params['recordSet'])) {
-						$params['recordSet'] = $model::all();
+					extract($params, EXTR_SKIP);
+					if (!isset($recordSet)) {
+						$recordSet = $model::all($query);
+						$self->set(compact('recordSet'));
 					}
-		
 					$self->set($params);
 					return $params;
 				};
@@ -128,21 +129,21 @@ class ScaffoldController extends \lithium\action\Controller {
 			
 			'view' => function(&$controller, $action, $vars, $flash) {
 				$fields = Scaffold::getDetailFields($vars['model']);
+				$query = array();
 				$messages = array(
 					'notfound' => '{:singular} not found.'
 				);
-				$params = $vars + compact('fields', 'messages');
-		
+				$params = $vars + compact('fields', 'messages', 'query');
 				$filter = function($self, $params) use($flash){
-					$model = $params['model'];
-					$messages = $params['messages'];
-					if (empty($params['record'])) {
-						$params['record'] = $model::first($self->request->id);
+					extract($params, EXTR_SKIP);
+					if (!isset($record)) {
+						$query = $query ?: $self->request->id;
+						$record = $model::first($query);
+						$self->set(compact('record'));
 					}
-					$record = $params['record'];
 					if (!$record) {
 						call_user_func_array($flash, array('error', 'notfound', $messages, $params));
-						return $self->redirect($params['redirect']);
+						return $self->redirect($redirect);
 					}
 		
 					$self->set($params);
@@ -153,24 +154,22 @@ class ScaffoldController extends \lithium\action\Controller {
 			
 			'add' => function(&$controller, $action, $vars, $flash) {
 				$fieldsets = Scaffold::getCreateFormFields($vars['model']);
+				$data = array();
 				$messages = array(
 					'error' => '{:singular} could not be created.',
 					'success' => '{:singular} created.'
 				);
-				$params = $vars + compact('fieldsets', 'messages');
-		
+				$params = $vars + compact('fieldsets', 'messages', 'data');
 				$filter = function($self, $params) use($flash){
-					$model = $params['model'];
-					$messages = $params['messages'];
-					if (empty($params['record'])) {
-						$params['record'] = $model::create();
+					extract($params, EXTR_SKIP);
+					if (!isset($record)) {
+						$record = $model::create($data);
+						$self->set(compact('record'));
 					}
-					$record = $params['record'];
-		
 					if ($self->request->data) {
 						if ($record->save($self->request->data)) {
 							call_user_func_array($flash, array('success', 'success', $messages, $params));
-							return $self->redirect($params['redirect']);
+							return $self->redirect($redirect);
 						}
 						call_user_func_array($flash, array('error', 'error', $messages, $params));
 					}
@@ -183,30 +182,28 @@ class ScaffoldController extends \lithium\action\Controller {
 			
 			'edit' => function(&$controller, $action, $vars, $flash) {
 				$fieldsets = Scaffold::getUpdateFormFields($vars['model']);
+				$query = array();
 				$messages = array(
 					'notfound' => '{:singular} not found.',
 					'error' => '{:singular} could not be updated.',
 					'success' => '{:singular} updated.'
 				);
-				$params = $vars + compact('fieldsets', 'messages');
-		
+				$params = $vars + compact('fieldsets', 'messages', 'query');
 				$filter = function($self, $params) use($flash){
-					$model = $params['model'];
-					$messages = $params['messages'];
-					if (empty($params['record'])) {
-						$params['record'] = $model::find($self->request->id);
+					extract($params, EXTR_SKIP);
+					if (!isset($record)) {
+						$query = $query ?: $self->request->id;
+						$record = $model::first($query);
+						$self->set(compact('record'));
 					}
-					$record = $params['record'];
-		
 					if (!$record) {
 						call_user_func_array($flash, array('error', 'notfound', $messages, $params));
-						return $self->redirect($params['redirect']);
+						return $self->redirect($redirect);
 					}
-		
 					if ($self->request->data) {
 						if ($record->save($self->request->data)) {
 							call_user_func_array($flash, array('success', 'success', $messages, $params));
-							return $self->redirect($params['redirect']);
+							return $self->redirect($redirect);
 						}
 						call_user_func_array($flash, array('error', 'error', $messages, $params));
 					}
@@ -218,19 +215,20 @@ class ScaffoldController extends \lithium\action\Controller {
 			},
 			
 			'delete' => function(&$controller, $action, $vars, $flash) {
+				$query = array();
 				$messages = array(
 					'notfound' => '{:singular} not found.',
 					'error' => '{:singular} could not be deleted.',
 					'success' => '{:singular} deleted.'
 				);
-				$params = $vars + compact('messages');
+				$params = $vars + compact('messages', 'query');
 				$filter = function($self, $params) use($flash){
-					$model = $params['model'];
-					$messages = $params['messages'];
-					if (empty($params['record'])) {
-						$params['record'] = $model::find($self->request->id);
+					extract($params, EXTR_SKIP);
+					if (!isset($record)) {
+						$query = $query ?: $self->request->id;
+						$record = $model::first($query);
+						$self->set(compact('record'));
 					}
-					$record = $params['record'];
 					if (!$record) {
 						call_user_func_array($flash, array('error', 'notfound', $messages, $params));
 					} elseif($record->delete()) {
@@ -238,7 +236,7 @@ class ScaffoldController extends \lithium\action\Controller {
 					} else {
 						call_user_func_array($flash, array('error', 'error', $messages, $params));
 					}
-					return $self->redirect($params['redirect']);
+					return $self->redirect($redirect);
 				};
 				return compact('params', 'filter');
 			},
@@ -246,7 +244,6 @@ class ScaffoldController extends \lithium\action\Controller {
 			'display' => function(&$controller, $action, $vars, $flash) {
 				$path = func_get_args() ?: array('display');
 				$params = $vars + compact('path');
-		
 				$filter = function($self, $params){
 					if (!isset($params['template'])) {
 						$params['template'] = join('/', (array) $params['path']);
