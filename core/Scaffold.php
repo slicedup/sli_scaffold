@@ -302,24 +302,29 @@ class Scaffold extends \lithium\core\StaticObject {
 		if (!$model && $default) {
 			$model = static::$_classes['model'];
 			$connection = static::$_config['connection'];
-			if (is_array($config) && array_key_exists('connection', $config)) {
+			if (array_key_exists('connection', $config)) {
 				$connection = $config['connection'];
 			}
-			$model::meta(array(
-				'connection' => $connection,
-				'name' => Inflector::pluralize(Inflector::classify($config['_name']))
-			));
+			$name = Inflector::pluralize(Inflector::classify($config['_name']));
 			$lookup = static::_source($config['_name'], $config['_library']);
 			$source = $lookup[0];
-			if ($connection = $model::connection()) {
+			foreach ((array) $connection as $conn) {
+				$model::meta(array(
+					'connection' => $conn,
+					'name' => $name
+				));
+				if (!($connection = $model::connection())) {
+					continue;
+				}
 				if ($sources = $connection->sources()) {
 					foreach ($lookup as $collection) {
 						if (in_array($collection, $sources)) {
 							$source = $collection;
-							break;
+							break 2;
 						}
 					}
 				}
+				
 			}
 			$model::meta(compact('source'));
 		}
