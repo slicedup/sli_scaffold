@@ -466,6 +466,33 @@ class Scaffold extends \lithium\core\StaticObject {
 	/**
 	 * Parse prefix from current action & configured prefixes
 	 * 
+	 * 
+	 * Note: prefixes can be defined in your app like so:
+	 * 
+	 * {{{
+	 * //Example of creating an 'admin' prefix
+	 * 
+	 * //Setup dispatcher rule
+	 * Dispatcher::config(array('rules' => array(
+	 * 	'admin' => array('action' => 'admin_{:action}')
+	 * )));
+	 * 
+	 * //Configure scaffolds to expect admin prefix
+	 * Scaffold::config(array(
+	 * 	'prefixes' => array(
+	 * 		'default' => '',
+	 * 		'admin' =>  'admin_',
+	 * 	)
+	 * ));
+	 * 
+	 * //Create continuation route to pass the prefixed route pattern
+	 * Router::connect('/admin/{:args}', array('admin' => true), array(
+	 * 	'continue' => true,
+	 * 	'persist' => array('controller', 'admin')
+	 * ));
+	 * }}}
+	 * 
+	 * 
 	 * @param string $action requested action
 	 * @param array $config
 	 */
