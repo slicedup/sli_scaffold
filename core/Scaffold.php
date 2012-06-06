@@ -142,7 +142,7 @@ class Scaffold extends \lithium\core\StaticObject {
 	 */
 	public static function get($name, $fullConfig = true) {
 		if (!isset(static::$_scaffold[$name])) {
-			if (empty(static::$_config['all'])) {
+			if (static::$_config['all'] !== true) {
 				return false;
 			}
 			static::set($name);
