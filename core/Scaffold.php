@@ -82,14 +82,17 @@ class Scaffold extends \lithium\core\StaticObject {
 			$config = array('all' => $config);
 		}
 		if ($config) {
-			if (isset($config['scaffold'])) {
-				static::set($config['scaffold']);
-			}
 			if (isset($config['classes'])) {
 				static::$_classes = $config['classes'] + static::$_classes;
 			}
+			if (isset($config['scaffold'])) {
+				$scaffolds = $config['scaffold'];
+			}
 			unset($config['scaffold'], $config['classes']);
 			static::$_config = $config + static::$_config;
+			if (isset($scaffolds)) {
+				static::set($scaffolds);
+			}
 		}
 		return static::$_config + array('scaffold' => static::$_scaffold);
 	}
@@ -121,6 +124,9 @@ class Scaffold extends \lithium\core\StaticObject {
 			$_name = $name;
 			if (strpos($name, '.')) {
 				list($_library, $_name) = explode('.', $name);
+			}
+			if ($_library && isset(static::$_config["library.{$_library}"])) {
+				$config += static::$_config["library.{$_library}"];
 			}
 			$config = compact('name', '_name', '_library') + $config;
 			static::$_scaffold[$name] = $config;
