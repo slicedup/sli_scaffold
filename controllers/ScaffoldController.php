@@ -91,6 +91,7 @@ class ScaffoldController extends \lithium\action\Controller {
 	public static function scaffoldVars(&$controller, $set = true) {
 		$name = Inflector::humanize($controller->scaffold['_name']);
 		$vars = array(
+			'scaffold' => $controller->scaffold,
 			'model' => Scaffold::model($controller->scaffold['name']),
 			'plural' => Inflector::pluralize($name),
 			'singular' => Inflector::singularize($name),
