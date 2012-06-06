@@ -332,23 +332,25 @@ class Scaffold extends \lithium\core\StaticObject {
 		if (!$config = static::get($name)) {
 			return false;
 		}
+		$prefixes = static::_prefixes($config, true);
 		$actions = isset($config['actions']) ? (array) $config['actions'] : static::$_config['actions'];
 		if (!isset($action)) {
-			return array_filter(array_map(function($action, $key) use($prefix){
+			return array_filter(array_map(function($action, $key) use($prefix, $prefixes){
 				if (is_array($action)) {
-					if (!isset($prefix) || in_array($prefix, $action)) {
-						return $key;	
-					}
-				} else {
+					$prefixes = $action;
+					$action = $key;
+				}
+				if (!isset($prefix) || in_array($prefix, $prefixes)) {
 					return $action;	
 				}
 				return false;
 			}, $actions, array_keys($actions)));
-		}
+		}		
 		if ($prefix) {
 			if (isset($actions[$action])) {
-				return in_array($prefix, $actions[$action]);
+				$prefixes = $actions[$action];
 			}
+			return in_array($prefix, $prefixes);
 		}
 		return in_array($action, $actions) || array_key_exists($action, $actions);
 	}
@@ -497,10 +499,7 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param array $config
 	 */
 	protected static function _parsePrefix($action, $config) {
-		$prefixes = static::$_config['prefixes'];
-		if (isset($config['prefixes'])) {
-			$prefixes = $config['prefixes'];
-		}
+		$prefixes = static::_prefixes($config);
 		$prefix = false;
 		if ($prefixes) {
 			foreach ($prefixes as $key => $pre) {
@@ -515,6 +514,30 @@ class Scaffold extends \lithium\core\StaticObject {
 			}
 		}
 		return compact('action', 'prefix');
+	}
+	
+	/**
+	 * Obtain a list of support prefixes for a given scaffold config
+	 * 
+	 * @param array $config
+	 * @param boolean $keys
+	 */
+	protected static function _prefixes($config, $keys = false) {
+		$prefixes = static::$_config['prefixes'];
+		if (isset($config['prefixes'])) {
+			$prefixes = array();
+			$_prefixes = (array)$config['prefixes'];
+			foreach ($_prefixes as $prefix => $pre) {
+				if (is_int($prefix)) {
+					if (array_key_exists($pre, static::$_config['prefixes'])) {
+						$prefixes[$pre] = static::$_config['prefixes'][$pre];
+					}
+				} else {
+					$prefixes[$prefix] = $pre;
+				}
+			}
+		}
+		return $keys ? array_keys($prefixes) : $prefixes;
 	}
 	
 	/**
