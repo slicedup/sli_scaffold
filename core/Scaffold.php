@@ -125,8 +125,8 @@ class Scaffold extends \lithium\core\StaticObject {
 			if (strpos($name, '.')) {
 				list($_library, $_name) = explode('.', $name);
 			}
-			if ($_library && isset(static::$_config["library.{$_library}"])) {
-				$config += static::$_config["library.{$_library}"];
+			if ($_library && isset(static::$_config[$_library])) {
+				$config += static::$_config[$_library];
 			}
 			$config = compact('name', '_name', '_library') + $config;
 			static::$_scaffold[$name] = $config;
