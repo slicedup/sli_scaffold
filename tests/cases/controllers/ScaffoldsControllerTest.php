@@ -8,7 +8,7 @@
 
 namespace sli_scaffold\tests\cases\controllers;
 
-class ScaffoldControllerTest extends \lithium\test\Unit {
+class ScaffoldsControllerTest extends \lithium\test\Unit {
 
 }
 

@@ -13,7 +13,7 @@ use lithium\util\String;
 use sli_base\action\FlashMessage;
 use sli_scaffold\core\Scaffold;
 
-class ScaffoldController extends \lithium\action\Controller {
+class ScaffoldsController extends \lithium\action\Controller {
 
 	public $scaffold;
 

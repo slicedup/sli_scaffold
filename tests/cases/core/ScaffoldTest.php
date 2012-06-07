@@ -247,21 +247,21 @@ class ScaffoldTest extends \lithium\test\Unit {
 		Scaffold::set('posts');
 		$result = Scaffold::get('posts');
 		$this->assertNull($result['controller']);
-		$expected = 'sli_scaffold\controllers\ScaffoldController';
+		$expected = 'sli_scaffold\controllers\ScaffoldsController';
 		$this->assertIdentical($expected, Scaffold::controller('posts'));
 
 		$config = array(
 			'controller' => 'sli_scaffold\tests\mocks\controllers\NonExistentController'
 		);
 		Scaffold::set('posts', $config);
-		$expected = 'sli_scaffold\controllers\ScaffoldController';
+		$expected = 'sli_scaffold\controllers\ScaffoldsController';
 		$this->assertIdentical($expected, Scaffold::controller('posts'));
 
 		$config = array(
 			'controller' => 'NonExistentController'
 		);
 		Scaffold::set('posts', $config);
-		$expected = 'sli_scaffold\controllers\ScaffoldController';
+		$expected = 'sli_scaffold\controllers\ScaffoldsController';
 		$this->assertIdentical($expected, Scaffold::controller('posts'));
 
 		$config = array(
@@ -495,7 +495,7 @@ class ScaffoldTest extends \lithium\test\Unit {
 		$result = $controller->scaffold;
 		$this->assertEqual($expected, $result);
 		
-		$expected = 'sli_scaffold\controllers\ScaffoldController';
+		$expected = 'sli_scaffold\controllers\ScaffoldsController';
 		$result = $controller->scaffold['controller'];
 		$this->assertEqual($expected, $result);
 	}
@@ -515,7 +515,7 @@ class ScaffoldTest extends \lithium\test\Unit {
 		$params = array();
 		$scaffold = Scaffold::invokeMethod('_callable', array($controller, $params));
 
-		$expected = 'sli_scaffold\controllers\ScaffoldController';
+		$expected = 'sli_scaffold\controllers\ScaffoldsController';
 		$this->assertTrue($scaffold instanceOf $expected);
 
 		$expected = Scaffold::invokeMethod('_invoke', array($controller));

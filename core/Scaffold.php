@@ -53,7 +53,7 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @var array
 	 */
 	protected static $_classes = array(
-		'controller' => 'sli_scaffold\controllers\ScaffoldController',
+		'controller' => 'sli_scaffold\controllers\ScaffoldsController',
 		'model' => 'sli_scaffold\models\Scaffolds'
 	);
 
