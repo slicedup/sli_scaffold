@@ -426,9 +426,8 @@ class Scaffold extends \lithium\core\StaticObject {
 		$scaffold = Libraries::get('sli_scaffold');
 		$paths = array();
 		
-		if ($controller == 'scaffolds') {
-			$paths['prepend']['template'][] = '{:library}/views/'.$_name.'/{:template}.{:type}.php';
-		} else {
+		$paths['prepend']['template'][] = '{:library}/views/'.$_name.'/{:template}.{:type}.php';
+		if ($controller != 'scaffolds') {
 			$paths['append']['template'][] = '{:library}/views/scaffolds/{:template}.{:type}.php';
 		}
 		
@@ -436,17 +435,21 @@ class Scaffold extends \lithium\core\StaticObject {
 			if ($library = ($library == 'app' ? '' : $library)) {
 				$library .= '/';
 			}
-			if ($controller == 'scaffolds') {
-				$paths['append']['template'][] = "{$base}/views/{$library}{$_name}/{:template}.{:type}.php";
-				$paths['append']['template'][] = "{$base}/views/{$library}{:controller}/{:template}.{:type}.php";
-				$paths['append']['template'][] = "{$base}/views/{$_name}/{:template}.{:type}.php";
-				$paths['append']['template'][] = "{$base}/views/{:controller}/{:template}.{:type}.php";
-			} else {
-				$paths['append']['template'][] = "{$base}/views/{$library}{:controller}/{:template}.{:type}.php";
+			
+			$paths['append']['template'][] = "{$base}/views/{$library}{$_name}/{:template}.{:type}.php";
+			$paths['append']['template'][] = "{$base}/views/{$library}{:controller}/{:template}.{:type}.php";
+			
+			if ($controller != 'scaffolds') {
 				$paths['append']['template'][] = "{$base}/views/{$library}scaffolds/{:template}.{:type}.php";
-				$paths['append']['template'][] = "{$base}/views/{:controller}/{:template}.{:type}.php";
+			}
+			
+			$paths['append']['template'][] = "{$base}/views/{$_name}/{:template}.{:type}.php";
+			$paths['append']['template'][] = "{$base}/views/{:controller}/{:template}.{:type}.php";
+			
+			if ($controller != 'scaffolds') {
 				$paths['append']['template'][] = "{$base}/views/scaffolds/{:template}.{:type}.php";
 			}
+			
 			$paths['append']['layout'][] = "{$base}/views/layouts/{$library}{:layout}.{:type}.php";
 			$paths['append']['layout'][] = "{$base}/views/layouts/{:layout}.{:type}.php";
 		};
