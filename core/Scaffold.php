@@ -281,6 +281,7 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param string $name
 	 * @param boolean $default true return default model classname if class not
 	 * found or configured
+	 * @todo proper source lookup so as to not trigger exceptions where name is assumed as source
 	 */
 	public static function model($name, $default = true) {
 		$config = static::get($name, false);
@@ -307,11 +308,12 @@ class Scaffold extends \lithium\core\StaticObject {
 			}
 			$name = Inflector::pluralize(Inflector::classify($config['_name']));
 			$lookup = static::_source($config['_name'], $config['_library']);
-			$source = $lookup[0];
+			$source = isset($config['source']) ?$config['source'] : null;
 			foreach ((array) $connection as $conn) {
 				$model::meta(array(
 					'connection' => $conn,
-					'name' => $name
+					'name' => $name,
+					'source' => $source
 				));
 				if (!($connection = $model::connection())) {
 					continue;
