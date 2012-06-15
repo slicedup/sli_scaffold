@@ -112,14 +112,17 @@ class ScaffoldsController extends \lithium\action\Controller {
 	protected static function _actions() {
 		return array(
 			'index' => function(&$controller, $action, $vars, $flash) {
-				$fields = Scaffold::getSummaryFields($vars['model']);
 				$query = array();
-				$params = $vars + compact('fields', 'query');
+				$params = $vars + compact('query');
 				$filter = function($self, $params){
 					extract($params, EXTR_SKIP);
 					if (!isset($recordSet)) {
 						$recordSet = $model::all($query);
 						$self->set(compact('recordSet'));
+					}
+					if (!isset($fields)) {
+						$fields = Scaffold::getSummaryFields($model);
+						$self->set(compact('fields'));
 					}
 					$self->set($params);
 					return $params;
@@ -128,12 +131,11 @@ class ScaffoldsController extends \lithium\action\Controller {
 			},
 			
 			'view' => function(&$controller, $action, $vars, $flash) {
-				$fields = Scaffold::getDetailFields($vars['model']);
 				$query = array();
 				$messages = array(
 					'notfound' => '{:singular} not found.'
 				);
-				$params = $vars + compact('fields', 'messages', 'query');
+				$params = $vars + compact('messages', 'query');
 				$filter = function($self, $params) use($flash){
 					extract($params, EXTR_SKIP);
 					if (!isset($record)) {
@@ -145,7 +147,10 @@ class ScaffoldsController extends \lithium\action\Controller {
 						call_user_func_array($flash, array('error', 'notfound', $messages, $params));
 						return $self->redirect($redirect);
 					}
-		
+					if (!isset($fields)) {
+						$fields = Scaffold::getDetailFields($record);
+						$self->set(compact('fields'));
+					}
 					$self->set($params);
 					return $params;
 				};
@@ -153,13 +158,12 @@ class ScaffoldsController extends \lithium\action\Controller {
 			},
 			
 			'add' => function(&$controller, $action, $vars, $flash) {
-				$fieldsets = Scaffold::getCreateFormFields($vars['model']);
 				$data = array();
 				$messages = array(
 					'error' => '{:singular} could not be created.',
 					'success' => '{:singular} created.'
 				);
-				$params = $vars + compact('fieldsets', 'messages', 'data');
+				$params = $vars + compact('messages', 'data');
 				$filter = function($self, $params) use($flash){
 					extract($params, EXTR_SKIP);
 					if (!isset($record)) {
@@ -173,7 +177,10 @@ class ScaffoldsController extends \lithium\action\Controller {
 						}
 						call_user_func_array($flash, array('error', 'error', $messages, $params));
 					}
-		
+					if (!isset($fieldsets)) {
+						$fieldsets = Scaffold::getCreateFormFields($record);
+						$self->set(compact('fieldsets'));
+					}
 					$self->set($params);
 					return $params;
 				};
@@ -181,14 +188,13 @@ class ScaffoldsController extends \lithium\action\Controller {
 			},
 			
 			'edit' => function(&$controller, $action, $vars, $flash) {
-				$fieldsets = Scaffold::getUpdateFormFields($vars['model']);
 				$query = array();
 				$messages = array(
 					'notfound' => '{:singular} not found.',
 					'error' => '{:singular} could not be updated.',
 					'success' => '{:singular} updated.'
 				);
-				$params = $vars + compact('fieldsets', 'messages', 'query');
+				$params = $vars + compact('messages', 'query');
 				$filter = function($self, $params) use($flash){
 					extract($params, EXTR_SKIP);
 					if (!isset($record)) {
@@ -207,7 +213,10 @@ class ScaffoldsController extends \lithium\action\Controller {
 						}
 						call_user_func_array($flash, array('error', 'error', $messages, $params));
 					}
-		
+					if (!isset($fieldsets)) {
+						$fieldsets = Scaffold::getUpdateFormFields($record);
+						$self->set(compact('fieldsets'));
+					}
 					$self->set($params);
 					return $params;
 				};
@@ -242,7 +251,7 @@ class ScaffoldsController extends \lithium\action\Controller {
 			},
 			
 			'display' => function(&$controller, $action, $vars, $flash) {
-				$path = func_get_args() ?: array('display');
+				$path = $controller->request->args ?: array('display');
 				$params = $vars + compact('path');
 				$filter = function($self, $params){
 					if (!isset($params['template'])) {

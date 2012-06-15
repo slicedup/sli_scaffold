@@ -184,6 +184,11 @@ class Scaffolds extends \lithium\data\Model {
 		if (!$fieldset) {
 			$fieldset = 'scaffold';
 		}
+		$binding = null;
+		if (is_object($model)) {
+			$binding = $model;
+			$model = $binding->model();
+		}
 		$setName = Inflector::camelize($fieldset, false) . 'Fields';
 		$getters = array(
 			"get" . ucfirst($setName),
@@ -193,13 +198,13 @@ class Scaffolds extends \lithium\data\Model {
 		$fields = array();
 		switch (true) {
 			case method_exists($model, $getters[0]):
-				$fields = $model::$getters[0]();
+				$fields = $model::$getters[0]($binding);
 				break;
 			case isset($model::$$setName):
 				$fields = $model::$$setName;
 				break;
 			case $getters[0] != $getters[1] && method_exists($model, $getters[1]):
-				$fields = $model::$getters[1]();
+				$fields = $model::$getters[1]($binding);
 				break;
 			case isset($model::$scaffoldFields):
 				$fields = $model::$scaffoldFields;
@@ -242,6 +247,12 @@ class Scaffolds extends \lithium\data\Model {
 		if (!$fieldset || strtolower($fieldset) == 'form') {
 			$fieldset = 'scaffold';
 		}
+		$binding = null;
+		if (is_object($model)) {
+			$binding = $model;
+			$model = $binding->model();
+		}
+		
 		$setName = Inflector::camelize($fieldset, false);
 		if (substr($setName, -4) != 'Form') {
 			$setName .= 'Form';
@@ -255,13 +266,13 @@ class Scaffolds extends \lithium\data\Model {
 		$fields = array();
 		switch (true) {
 			case method_exists($model, $getters[0]):
-				$fields = $model::$getters[0]();
+				$fields = $model::$getters[0]($binding);
 				break;
 			case isset($model::$$setName):
 				$fields = $model::$$setName;
 				break;
 			case $getters[0] != $getters[1] && method_exists($model, $getters[1]):
-				$fields = $model::$getters[1]();
+				$fields = $model::$getters[1]($binding);
 				break;
 			case isset($model::$scaffoldFormFields):
 				$fields = $model::$scaffoldFormFields;
@@ -309,7 +320,7 @@ class Scaffolds extends \lithium\data\Model {
 		return array();
 	}
 
-	public function setFieldMapping($mapping, $fields = array()) {
+	public static function setFieldMapping($mapping, $fields = array()) {
 		static::$_formFieldMappings[$mapping] = $fields;
 	}
 
@@ -320,7 +331,7 @@ class Scaffolds extends \lithium\data\Model {
 	 * @param mixed $mapping
 	 * @param array $fieldset
 	 */
-	protected static function mapFormFields($model, $fieldset = array(), $mapping = null){
+	public static function mapFormFields($model, $fieldset = array(), $mapping = null){
 		if (!is_array($mapping)) {
 			$mapping = static::getFieldMapping($mapping);
 		}
@@ -343,6 +354,9 @@ class Scaffolds extends \lithium\data\Model {
 			if ($type && isset($mapping[$type])) {
 				$fields[$field]+= $mapping[$type];
 			}
+			if ($type != $field && isset($mapping[$field])) {
+				$fields[$field]+= $mapping[$field];
+			}
 		}
 		return $fields;
 	}
@@ -361,6 +375,9 @@ class Scaffolds extends \lithium\data\Model {
 			}
 			if (isset($mapping[$settings['type']])) {
 				$fields[$field]+= $mapping[$settings['type']];
+			}
+			if ($settings['type'] != $field && isset($mapping[$field])) {
+				$fields[$field]+= $mapping[$field];
 			}
 		}
 		return $fields;
