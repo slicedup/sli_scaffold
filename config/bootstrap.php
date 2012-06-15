@@ -38,14 +38,10 @@ Dispatcher::applyFilter('_callable', function($self, $params, $chain) {
 	if (isset($params['options']['scaffold'])) {
 		return $chain->next($self, $params, $chain);
 	}
-	$controller = $params['params']['controller'];
-	$_controller = Libraries::locate('controllers', $controller);
-	if(!$_controller && $scaffold = Scaffold::detect($params['params'])) {
+	if($scaffold = Scaffold::detect($params['params'])) {
 		if ($controller = Scaffold::controller($scaffold)) {
 			$params['params']['controller'] = $controller;
 		}
-	} else {
-		$scaffold = Scaffold::detect(array('controller' => $_controller) + $params['params']);
 	}
 	$controller = $chain->next($self, $params, $chain);
 	if (property_exists($controller, 'scaffold')) {
