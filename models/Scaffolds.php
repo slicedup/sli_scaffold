@@ -16,10 +16,10 @@ use BadMethodCallException;
  * configured within your own models. Models do not need to extend this model
  * class to provide this functionality excpet where you specificaly require
  * access to the fieldset getters explicitly for that model.
- * 
+ *
  * It is also used as a model stub to access datasources for undefined models
  * in the scaffold.
- * 
+ *
  * Scaffold fieldset properties should be added to your models as needed and
  * querried like so:
  * {{{
@@ -252,7 +252,7 @@ class Scaffolds extends \lithium\data\Model {
 			$binding = $model;
 			$model = $binding->model();
 		}
-		
+
 		$setName = Inflector::camelize($fieldset, false);
 		if (substr($setName, -4) != 'Form') {
 			$setName .= 'Form';

@@ -157,7 +157,7 @@ class Scaffold extends \lithium\core\StaticObject {
 
 	/**
 	 * Detect scaffold config from dispatch params
-	 * 
+	 *
 	 * @param mixed $params array dispatch params, string controller name variation
 	 */
 	public static function detect($params) {
@@ -203,7 +203,7 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * @param \lithium\action\Controller $controller
 	 * @param array $params
 	 */
-	public static function prepare($name, &$controller, $params){		
+	public static function prepare($name, &$controller, $params){
 		if (!property_exists($controller, 'scaffold') || ($config = static::get($name)) === false) {
 			return;
 		}
@@ -224,27 +224,27 @@ class Scaffold extends \lithium\core\StaticObject {
 		$prefixed = static::_parsePrefix($action, $config);
 		extract($prefixed);
 		$controller->scaffold['prefix'] = $prefix;
-		
+
 		if (method_exists($controller, $_action) && static::$_classes['controller'] != get_class($controller)) {
 			if (method_exists($controller, '_scaffold')) {
 				$controller->invokeMethod('_scaffold', array($controller, $params['params'], $params['options']));
 			}
 			return;
 		}
-		
+
 		if (!$prefix || !static::handledAction($name, $action, $prefix)) {
 			throw new DispatchException("Action `{$_action}` not scaffolded.");
 		}
-		
+
 		$scaffold = get_called_class();
 		$controller->applyFilter('__invoke', function($self, $params, $chain) use($scaffold, $action){
 			$dispatchParams = $params['dispatchParams'];
 			$dispatchParams = compact('action') + ($dispatchParams ?: array());
 			$options = $params['options'];
 			return $scaffold::invokeMethod('_invoke', array($self, $dispatchParams, $options));
-		});	
+		});
 	}
-	
+
 	/**
 	 * Get controller class name for a scaffold
 	 *
@@ -326,13 +326,13 @@ class Scaffold extends \lithium\core\StaticObject {
 						}
 					}
 				}
-				
+
 			}
 			$model::meta(compact('source'));
 		}
 		return $model;
 	}
-	
+
 	/**
 	 * Checks is an action is provided in the Scaffold config
 	 *
@@ -354,11 +354,11 @@ class Scaffold extends \lithium\core\StaticObject {
 					$action = $key;
 				}
 				if (!isset($prefix) || in_array($prefix, $prefixes)) {
-					return $action;	
+					return $action;
 				}
 				return false;
 			}, $actions, array_keys($actions)));
-		}		
+		}
 		if ($prefix) {
 			if (isset($actions[$action])) {
 				$prefixes = $actions[$action];
@@ -367,7 +367,7 @@ class Scaffold extends \lithium\core\StaticObject {
 		}
 		return in_array($action, $actions) || array_key_exists($action, $actions);
 	}
-	
+
 	/**
 	 * Get a default set of configuration options for a given scaffold based on
 	 * current scaffold config and scaffold name
@@ -425,35 +425,35 @@ class Scaffold extends \lithium\core\StaticObject {
 		$controller = Inflector::underscore($class);
 		$scaffold = Libraries::get('sli_scaffold');
 		$paths = array();
-		
+
 		$paths['prepend']['template'][] = '{:library}/views/'.$_name.'/{:template}.{:type}.php';
 		if ($controller != 'scaffolds') {
 			$paths['append']['template'][] = '{:library}/views/scaffolds/{:template}.{:type}.php';
 		}
-		
+
 		$addLibraryPaths = function($base, $library = null) use(&$paths, $_name, $controller) {
 			if ($library = ($library == 'app' ? '' : $library)) {
 				$library .= '/';
 			}
-			
+
 			$paths['append']['template'][] = "{$base}/views/{$library}{$_name}/{:template}.{:type}.php";
 			$paths['append']['template'][] = "{$base}/views/{$library}{:controller}/{:template}.{:type}.php";
-			
+
 			if ($controller != 'scaffolds') {
 				$paths['append']['template'][] = "{$base}/views/{$library}scaffolds/{:template}.{:type}.php";
 			}
-			
+
 			$paths['append']['template'][] = "{$base}/views/{$_name}/{:template}.{:type}.php";
 			$paths['append']['template'][] = "{$base}/views/{:controller}/{:template}.{:type}.php";
-			
+
 			if ($controller != 'scaffolds') {
 				$paths['append']['template'][] = "{$base}/views/scaffolds/{:template}.{:type}.php";
 			}
-			
+
 			$paths['append']['layout'][] = "{$base}/views/layouts/{$library}{:layout}.{:type}.php";
 			$paths['append']['layout'][] = "{$base}/views/layouts/{:layout}.{:type}.php";
 		};
-		
+
 		if (is_string($config['paths'])) {
 			$base = $config['paths'];
 			if ($library = Libraries::get($config['paths'])) {
@@ -461,16 +461,16 @@ class Scaffold extends \lithium\core\StaticObject {
 			}
 			$addLibraryPaths($base, $_library);
 		}
-		
+
 		if ($_library && $_library != 'app' && $library = Libraries::get($_library)) {
 			$base = $library['path'];
 			$addLibraryPaths($base);
 		}
-		
+
 		$addLibraryPaths(LITHIUM_APP_PATH, $_library);
 
 		$paths['append']['template'][] = $scaffold['path'] . '/views/scaffolds/{:template}.{:type}.php';
-		
+
 		$params = compact('paths') + array('name' => $name);
 		$filter = function($self, $params, $chain){
 			$paths = $params['paths'];
@@ -488,21 +488,21 @@ class Scaffold extends \lithium\core\StaticObject {
 
 		static::_filter(__FUNCTION__, $params, $filter);
 	}
-	
+
 	/**
 	 * Parse prefix from current action & configured prefixes
-	 * 
-	 * 
+	 *
+	 *
 	 * Note: prefixes can be defined in your app like so:
-	 * 
+	 *
 	 * {{{
 	 * //Example of creating an 'admin' prefix
-	 * 
+	 *
 	 * //Setup dispatcher rule
 	 * Dispatcher::config(array('rules' => array(
 	 * 	'admin' => array('action' => 'admin_{:action}')
 	 * )));
-	 * 
+	 *
 	 * //Configure scaffolds to expect admin prefix
 	 * Scaffold::config(array(
 	 * 	'prefixes' => array(
@@ -510,15 +510,15 @@ class Scaffold extends \lithium\core\StaticObject {
 	 * 		'admin' =>  'admin_',
 	 * 	)
 	 * ));
-	 * 
+	 *
 	 * //Create continuation route to pass the prefixed route pattern
 	 * Router::connect('/admin/{:args}', array('admin' => true), array(
 	 * 	'continue' => true,
 	 * 	'persist' => array('controller', 'admin')
 	 * ));
 	 * }}}
-	 * 
-	 * 
+	 *
+	 *
 	 * @param string $action requested action
 	 * @param array $config
 	 */
@@ -539,10 +539,10 @@ class Scaffold extends \lithium\core\StaticObject {
 		}
 		return compact('action', 'prefix');
 	}
-	
+
 	/**
 	 * Obtain a list of support prefixes for a given scaffold config
-	 * 
+	 *
 	 * @param array $config
 	 * @param boolean $keys
 	 */
@@ -563,12 +563,12 @@ class Scaffold extends \lithium\core\StaticObject {
 		}
 		return $keys ? array_keys($prefixes) : $prefixes;
 	}
-	
+
 	/**
 	 * Locate a given class type (contoller or model) based on a configured
 	 * scaffold name given prefernce to libraries if configured, and also
 	 * accounting for incorrect pluralization.
-	 * 
+	 *
 	 * @param string $type
 	 * @param string $name
 	 * @param string $library
@@ -590,11 +590,11 @@ class Scaffold extends \lithium\core\StaticObject {
 			}
 		}
 	}
-	
+
 	/**
 	 * Generate a list of possible collection/tabel names based on a configured
 	 * scaffold name accounting for library prefixes
-	 * 
+	 *
 	 * @param string $name
 	 * @param string $library
 	 */

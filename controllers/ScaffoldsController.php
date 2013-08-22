@@ -42,7 +42,7 @@ class ScaffoldsController extends \lithium\action\Controller {
 		return self::scaffoldAction($this, __FUNCTION__);
 	}
 
-	public function display() {		
+	public function display() {
 		return self::scaffoldAction($this, __FUNCTION__);
 	}
 
@@ -63,10 +63,10 @@ class ScaffoldsController extends \lithium\action\Controller {
 				$method = get_class($controller) . '::' . $action;
 				return $controller->invokeMethod('_filter', array($method, $params, $filter));
 			}
-			return $call;	
+			return $call;
 		}
 	}
-	
+
 	/**
 	 * Format a  default scaffold flash message by insetring defined data and
 	 * passing the the flash message class
@@ -81,7 +81,7 @@ class ScaffoldsController extends \lithium\action\Controller {
 				$string = String::insert($string, $data);
 				array_unshift($message, $string);
 				return FlashMessage::invokeMethod($key, $message);
-			}	
+			}
 		}
 	}
 
@@ -105,7 +105,7 @@ class ScaffoldsController extends \lithium\action\Controller {
 		}
 		return $vars;
 	}
-	
+
 	/**
 	 * Get scaffold action definitions
 	 */
@@ -129,7 +129,7 @@ class ScaffoldsController extends \lithium\action\Controller {
 				};
 				return compact('params', 'filter');
 			},
-			
+
 			'view' => function(&$controller, $action, $vars, $flash) {
 				$query = array();
 				$messages = array(
@@ -156,7 +156,7 @@ class ScaffoldsController extends \lithium\action\Controller {
 				};
 				return compact('params', 'filter');
 			},
-			
+
 			'add' => function(&$controller, $action, $vars, $flash) {
 				$data = array();
 				$messages = array(
@@ -186,7 +186,7 @@ class ScaffoldsController extends \lithium\action\Controller {
 				};
 				return compact('params', 'filter');
 			},
-			
+
 			'edit' => function(&$controller, $action, $vars, $flash) {
 				$query = array();
 				$messages = array(
@@ -222,7 +222,7 @@ class ScaffoldsController extends \lithium\action\Controller {
 				};
 				return compact('params', 'filter');
 			},
-			
+
 			'delete' => function(&$controller, $action, $vars, $flash) {
 				$query = array();
 				$messages = array(
@@ -249,7 +249,7 @@ class ScaffoldsController extends \lithium\action\Controller {
 				};
 				return compact('params', 'filter');
 			},
-			
+
 			'display' => function(&$controller, $action, $vars, $flash) {
 				$path = $controller->request->args ?: array('display');
 				$params = $vars + compact('path');
