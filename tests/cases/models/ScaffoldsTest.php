@@ -20,7 +20,7 @@ class ScaffoldsTest extends \lithium\test\Unit {
 		$post = $this->_model;
 		$schema = $post::schema();
 		$fields = Model::getFields($post);
-		$expected = array_keys($schema);
+		$expected = array_keys($schema->fields());
 		$result = array_keys($fields);
 		$this->assertEqual($expected, $result);
 

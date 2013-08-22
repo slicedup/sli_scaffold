@@ -37,12 +37,12 @@ class ScaffoldTest extends \lithium\test\Unit {
 	protected $_configs = array();
 	
 	protected $_scaffold = array();
-	
+
+	public function _init() {
+		Connections::add('mock-source', array('type' => '\sli_base\tests\mocks\data\MockSource'));
+	}
+
 	public function setUp() {
-		$this->_configs = Connections::config();
-		Connections::config(array('mock-source' => array(
-			'type' => 'lithium\tests\mocks\data\MockSource'
-		)));
 		MockPost::config(array('connection' => 'mock-source'));
 		$this->_scaffold = Scaffold::config();
 		if (!empty($this->_scaffold['scaffold'])) {
@@ -69,8 +69,6 @@ class ScaffoldTest extends \lithium\test\Unit {
 	}
 
 	public function tearDown() {
-		Connections::reset();
-		Connections::config($this->_configs);
 		$config = Scaffold::config();
 		Scaffold::config(array('all' => true));
 		if (!empty($config['scaffold'])) {
@@ -540,6 +538,7 @@ class ScaffoldTest extends \lithium\test\Unit {
 	 * Create basic request params as passed to `Dispatcher::_callable()`
 	 */
 	protected function _request($url = '/posts') {
+		Router::connect('/{:controller}/{:action}/{:args}');
 		$request = Router::process(new Request(compact('url')));
 		$params = array(
 			'request' => $request,

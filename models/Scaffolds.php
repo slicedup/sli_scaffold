@@ -214,7 +214,7 @@ class Scaffolds extends \lithium\data\Model {
 		$filter = function($self, $params) {
 			extract($params);
 			if (empty($fields)) {
-				$schema = $model::schema();
+				$schema = $model::schema()->fields();
 				$keys = array_keys($schema);
 				$fieldsNames = array_map('lithium\util\Inflector::humanize', $keys);
 				$fields = array_combine($keys, $fieldsNames);
@@ -338,7 +338,7 @@ class Scaffolds extends \lithium\data\Model {
 		if (!$fieldset) {
 			return static::mapSchemaFields($model, $mapping);
 		}
-		$schema = $model::schema();
+		$schema = $model::schema()->fields();
 		$key = $model::meta('key');
 		$fields = array();
 		foreach ($fieldset as $field => $settings) {
@@ -365,7 +365,7 @@ class Scaffolds extends \lithium\data\Model {
 		if (!is_array($mapping)) {
 			$mapping = static::getFieldMapping($mapping);
 		}
-		$schema = $schema ?: $model::schema();
+		$schema = $schema ?: $model::schema()->fields();
 		$key = $model::meta('key');
 		$fields = array();
 		foreach ($schema as $field => $settings) {

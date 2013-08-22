@@ -10,6 +10,8 @@ namespace sli_scaffold\tests\mocks\data;
 
 class MockPost extends \lithium\data\Model {
 
+	protected $_meta = array('connection' => 'mock-source');
+
 	public static $scaffoldFields;
 
 	public static $summaryFields;
