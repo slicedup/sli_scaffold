@@ -128,6 +128,9 @@ class Scaffold extends \lithium\core\StaticObject {
 			if ($_library && isset(static::$_config[$_library])) {
 				$config += static::$_config[$_library];
 			}
+// 			if (isset(static::$_config['defaults'])) {
+// 				$config += static::$_config['defaults'];
+// 			}
 			$config = compact('name', '_name', '_library') + $config;
 			static::$_scaffold[$name] = $config;
 		}
@@ -300,15 +303,15 @@ class Scaffold extends \lithium\core\StaticObject {
 		} else {
 			$model = static::_locate('models', $config['_name'], $config['_library']);
 		}
-		if (!$model && $default) {
-			$model = static::$_classes['model'];
+		if ((!$model && $default) || isset($config['source'])) {
+			$model = $model ?: static::$_classes['model'];
 			$connection = static::$_config['connection'];
 			if (array_key_exists('connection', $config)) {
 				$connection = $config['connection'];
 			}
 			$name = Inflector::pluralize(Inflector::classify($config['_name']));
 			$lookup = static::_source($config['_name'], $config['_library']);
-			$source = isset($config['source']) ?$config['source'] : null;
+			$source = isset($config['source']) && is_string($config['source']) ?$config['source'] : null;
 			foreach ((array) $connection as $conn) {
 				$model::meta(array(
 					'connection' => $conn,

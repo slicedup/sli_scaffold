@@ -12,6 +12,14 @@ use lithium\net\http\Media;
 use lithium\util\String;
 use sli_scaffold\core\Scaffold;
 
+
+/**
+ * Load any config options set when library is included
+ */
+if ($config = Libraries::get('sli_scaffold', 'config')) {
+	Scaffold::config($config);
+}
+
 /**
  * Dispatch filter to patch the call to translate in scaffold templates that
  * are g11n enabled, when g11n hanlders are not set

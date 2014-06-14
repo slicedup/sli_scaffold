@@ -8,7 +8,7 @@
 
 $this->title($t($plural));
 ?>
-<div class="scaffold <?php echo $plural;?> view<?php echo $singular;?>">
+<div class="scaffold scaffold-view <?php echo $plural;?> <?php echo $singular;?>-view">
 	<h2><?php echo $t('{:action} {:entity}', array('action' => $t('View'), 'entity' => $t($singular)));?></h2>
 	<div class="details">
 		<dl>

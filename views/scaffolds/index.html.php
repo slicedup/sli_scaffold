@@ -7,7 +7,7 @@
  */
 $this->title($t($plural));
 ?>
-<div class="scaffold <?php echo $plural;?> index<?php echo $singular;?>">
+<div class="scaffold scaffold-index <?php echo $plural;?> <?php echo $singular;?>-index">
 	<h2><?php echo $t($plural);?></h2>
 	<div class="summary">
 		<table>
